@@ -182,6 +182,8 @@ def analyze(extra=None):
 register(
     "sha256",
     type="hashing",
+    family="hashing",
+    kind=None,
     name={"ar": "SHA-256", "en": "SHA-256"},
     description={
         "ar": "دالة تجزئة آمنة 256-بت",

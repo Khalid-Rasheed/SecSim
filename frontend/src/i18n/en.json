@@ -1,7 +1,17 @@
 {
   "app": "SecSim",
   "tagline": "Interactive platform for simulating and analyzing security algorithms",
-  "nav": { "home": "Home", "simulator": "Simulator", "history": "History", "profile": "Profile", "login": "Login", "logout": "Logout" },
+  "nav": { "home": "Home", "simulator": "Simulator", "algorithms": "Algorithms", "history": "History", "profile": "Profile", "login": "Login", "logout": "Logout" },
+  "tax": {
+    "encryption": "Encryption",
+    "symmetric": "Symmetric",
+    "asymmetric": "Asymmetric",
+    "stream": "Stream",
+    "block": "Block",
+    "factorization": "Factorization",
+    "hashing": "Hashing",
+    "attack": "Attacks"
+  },
   "hero": {
     "eyebrow": "Security algorithms lab",
     "title": "Watch encryption happen, character by character",

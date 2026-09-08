@@ -300,6 +300,8 @@ def analyze(extra=None):
 register(
     "rsa",
     type="encryption",
+    family="asymmetric",
+    kind="factorization",
     name={"ar": "RSA", "en": "RSA"},
     description={
         "ar": "تشفير بالمفتاح العام — مفاتيح صغيرة للتعليم فقط",

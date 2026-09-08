@@ -337,6 +337,8 @@ def analyze(extra=None):
 register(
     "aes",
     type="encryption",
+    family="symmetric",
+    kind="block",
     name={"ar": "AES", "en": "AES"},
     description={
         "ar": "معيار التشفير المتقدم — وضع CBC بخطوات كل كتلة",

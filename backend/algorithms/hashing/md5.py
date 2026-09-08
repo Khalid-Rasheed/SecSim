@@ -172,6 +172,8 @@ def analyze(extra=None):
 register(
     "md5",
     type="hashing",
+    family="hashing",
+    kind=None,
     name={"ar": "MD5", "en": "MD5"},
     description={
         "ar": "دالة تجزئة مكسورة — للمقارنة والتعليم فقط",

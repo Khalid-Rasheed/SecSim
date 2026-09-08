@@ -221,6 +221,8 @@ def analyze(extra=None):
 register(
     "brute_force",
     type="attack",
+    family="attack",
+    kind=None,
     name={"ar": "القوة الغاشمة", "en": "Brute Force"},
     description={
         "ar": "هجوم يجرب مفاتيح قيصر الـ 25 على نص مشفر",

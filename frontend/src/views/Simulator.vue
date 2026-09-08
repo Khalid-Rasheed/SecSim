@@ -17,7 +17,7 @@
         <p v-if="store.currentMeta?.name?.ar" class="text-lg font-semibold mt-1">{{ store.currentMeta.name.ar }}</p>
       </div>
       <span class="font-mono text-xs px-3 py-1.5 rounded-lg bg-cipher/10 border border-cipher/30 text-cipher" dir="ltr">
-        {{ store.currentMeta?.type || '—' }}
+        {{ taxBreadcrumb }}
       </span>
     </div>
 
@@ -28,17 +28,27 @@
           <h2 class="text-sm font-semibold mb-3">
             <i class="fa-solid fa-microchip text-cipher me-2"></i>{{ $t('sim.choose') }}
           </h2>
-          <div class="grid grid-cols-2 gap-2">
-            <button
-              v-for="a in store.algorithms"
-              :key="a.id"
-              @click="store.algorithm = a.id"
-              :class="['panel-flat p-3 text-start transition', store.algorithm === a.id ? '!border-cipher bg-cipher/10' : 'hover:border-muted']"
-            >
-              <i :class="[algoIcon(a.type), 'text-xs mb-1.5', store.algorithm === a.id ? 'text-cipher' : 'text-muted']"></i>
-              <div class="font-display font-semibold text-sm" dir="ltr">{{ a.id }}</div>
-              <div class="text-[0.7rem] text-muted font-mono" dir="ltr">{{ a.type }}</div>
-            </button>
+          <!-- Grouped picker: mirrors the navbar dropdown taxonomy
+               (encryption → family → kind; hashing/attacks flat). -->
+          <div class="space-y-4">
+            <div v-for="grp in pickerGroups" :key="grp.key">
+              <p class="text-[0.7rem] font-extrabold text-mist mb-1.5">
+                {{ grp.title }}
+                <span v-if="grp.sub" class="font-semibold text-muted">· {{ grp.sub }}</span>
+              </p>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  v-for="a in grp.items"
+                  :key="a.id"
+                  @click="store.algorithm = a.id"
+                  :class="['panel-flat p-3 text-start transition', store.algorithm === a.id ? '!border-cipher bg-cipher/10' : 'hover:border-muted']"
+                >
+                  <i :class="[algoIcon(a.type), 'text-xs mb-1.5', store.algorithm === a.id ? 'text-cipher' : 'text-muted']"></i>
+                  <div class="font-display font-semibold text-sm" dir="ltr">{{ a.id }}</div>
+                  <div class="text-[0.7rem] text-muted font-mono" dir="ltr">{{ a.kind || a.type }}</div>
+                </button>
+              </div>
+            </div>
           </div>
           <router-link :to="'/algorithms/' + store.algorithm" class="text-xs text-cipher hover:underline mt-2 inline-block">
             <i class="fa-solid fa-book-open me-1"></i>{{ $t('alg.learn_more') }}: <span class="font-mono" dir="ltr">{{ store.algorithm }}</span>
@@ -159,7 +169,7 @@
             <i class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0"></i>
             <span>{{ store.warning[locale] || store.warning.en }}</span>
           </div>
-          <p v-else class="text-sm text-muted">
+          <p v-if="!store.result" class="text-sm text-muted">
             <i class="fa-solid fa-terminal me-2"></i>{{ $t('sim.need_run') }}
           </p>
         </div>
@@ -180,13 +190,56 @@ import VisualizationArea from '../components/simulation/VisualizationArea.vue'
 import SecurityMetrics from '../components/analysis/SecurityMetrics.vue'
 const store = useSimulationStore()
 const route = useRoute()
-const { locale } = useI18n()
+const { t, locale } = useI18n()
 const copied = ref(false)
 function algoIcon(type) {
   if (type === 'attack') return 'fa-solid fa-burst'
   if (type === 'hashing') return 'fa-solid fa-fingerprint'
   return 'fa-solid fa-key'
 }
+// Breadcrumb for the masthead badge, e.g. "symmetric · stream".
+// Falls back to the flat type for entries without taxonomy.
+const taxBreadcrumb = computed(() => {
+  const m = store.currentMeta
+  if (!m) return '—'
+  if (m.type === 'encryption' && m.family) {
+    return m.kind ? `${m.family} · ${m.kind}` : m.family
+  }
+  return m.type
+})
+// Grouped picker sections mirroring the navbar dropdown taxonomy:
+// one section per (family, kind) under encryption, flat sections for
+// hashing and attacks. Catalog order is preserved inside groups.
+const pickerGroups = computed(() => {
+  const groups = []
+  const enc = store.algorithms.filter((a) => a.type === 'encryption')
+  for (const family of ['symmetric', 'asymmetric']) {
+    const members = enc.filter((a) => a.family === family)
+    const kinds = []
+    for (const a of members) {
+      if (!kinds.includes(a.kind)) kinds.push(a.kind)
+    }
+    for (const kind of kinds) {
+      groups.push({
+        key: `${family}/${kind}`,
+        title: t('tax.' + family),
+        sub: kind ? t('tax.' + kind) : '',
+        items: members.filter((a) => a.kind === kind)
+      })
+    }
+  }
+  const flat = (type) => ({
+    key: type,
+    title: t('tax.' + type),
+    sub: '',
+    items: store.algorithms.filter((a) => a.type === type)
+  })
+  // Only append non-empty sections (robust to catalog changes).
+  for (const sec of [flat('hashing'), flat('attack')]) {
+    if (sec.items.length) groups.push(sec)
+  }
+  return groups
+})
 const briefText = computed(() => {
   const d = store.currentDetail?.details?.overview
   if (d) return d[locale.value] || d.en
@@ -223,4 +276,14 @@ onMounted(async () => {
   await store.fetchDetails()
   if (store.input && !store.result) await store.run()
 })
+// React to navbar-dropdown navigation while already on this view:
+// /simulator?algo=aes must switch the bench without a full reload.
+watch(
+  () => route.query.algo,
+  async (id) => {
+    if (id && id !== store.algorithm && store.algorithms.some((a) => a.id === id)) {
+      store.algorithm = id
+    }
+  }
+)
 </script>

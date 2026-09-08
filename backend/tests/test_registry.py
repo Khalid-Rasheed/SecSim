@@ -44,6 +44,18 @@ SAMPLES = {
     "attack": "Khoor Zruog",
 }
 
+# Expected taxonomy: family/kind per algorithm id. Encryption entries
+# must sit in the symmetric/asymmetric tree; hashing and attack
+# entries carry their type as family with no subtype (shown flat).
+EXPECTED_TAXONOMY = {
+    "caesar": ("symmetric", "stream"),
+    "aes": ("symmetric", "block"),
+    "rsa": ("asymmetric", "factorization"),
+    "sha256": ("hashing", None),
+    "md5": ("hashing", None),
+    "brute_force": ("attack", None),
+}
+
 
 def test_registry_contract_for_all(client):
     discover()
@@ -54,8 +66,16 @@ def test_registry_contract_for_all(client):
         # meta is JSON-safe and complete
         meta = entry["meta"]
         assert meta["id"] == algo_id
-        for field in ("type", "name", "description", "params", "complexity"):
+        for field in ("type", "family", "kind", "name", "description", "params", "complexity"):
             assert field in meta, (algo_id, field)
+        # taxonomy placement matches the documented menu tree
+        assert (meta["family"], meta["kind"]) == EXPECTED_TAXONOMY[algo_id], (algo_id, meta)
+        if meta["type"] == "encryption":
+            assert meta["family"] in ("symmetric", "asymmetric"), algo_id
+            assert isinstance(meta["kind"], str) and meta["kind"], algo_id
+        else:
+            assert meta["family"] == meta["type"], algo_id
+            assert meta["kind"] is None, algo_id
         # simulate: valid input → unified steps
         sample = SAMPLES[meta["type"]]
         extra = {"key_size": 128, "key_text": "secret", "rsa_p": 61, "rsa_q": 53, "rsa_e": 17, "key": 3}

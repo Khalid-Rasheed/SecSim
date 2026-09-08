@@ -1,7 +1,17 @@
 {
   "app": "SecSim",
   "tagline": "منصة تفاعلية لمحاكاة وتحليل الخوارزميات الأمنية",
-  "nav": { "home": "الرئيسية", "simulator": "المحاكاة", "history": "السجل", "profile": "حسابي", "login": "دخول", "logout": "خروج" },
+  "nav": { "home": "الرئيسية", "simulator": "المحاكاة", "algorithms": "الخوارزميات", "history": "السجل", "profile": "حسابي", "login": "دخول", "logout": "خروج" },
+  "tax": {
+    "encryption": "التشفير",
+    "symmetric": "تناظرية",
+    "asymmetric": "غير تناظرية",
+    "stream": "انسيابية",
+    "block": "كتلية",
+    "factorization": "تفكيك الأعداد",
+    "hashing": "التجزئة",
+    "attack": "الهجمات"
+  },
   "hero": {
     "eyebrow": "مختبر الخوارزميات الأمنية",
     "title": "شاهد التشفير وهو يحدث، حرفاً بحرف",
