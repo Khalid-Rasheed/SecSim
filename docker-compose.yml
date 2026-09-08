@@ -1,0 +1,36 @@
+# SecSim full stack: Flask API (gunicorn) + Vue SPA (nginx).
+# Usage: docker compose up --build  →  UI at http://localhost:5173
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      # Override the dev secrets in production (docker compose --env-file
+      # or your orchestrator's secret store).
+      SECRET_KEY: ${SECRET_KEY:-secsim-compose-secret-change-me}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-secsim-compose-jwt-change-me}
+      DATABASE_URL: sqlite:////data/secsim.db
+      RATELIMIT_URL: memory://
+    volumes:
+      # Persist the SQLite DB across container restarts.
+      - secsim-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:5000/api}
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_started
+
+volumes:
+  secsim-data:
