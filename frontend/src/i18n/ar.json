@@ -1,7 +1,15 @@
 {
   "app": "SecSim",
   "tagline": "منصة تفاعلية لمحاكاة وتحليل الخوارزميات الأمنية",
-  "nav": { "home": "الرئيسية", "simulator": "المحاكاة", "algorithms": "الخوارزميات", "history": "السجل", "profile": "حسابي", "login": "دخول", "logout": "خروج" },
+  "nav": {
+    "home": "الرئيسية",
+    "simulator": "المحاكاة",
+    "algorithms": "الخوارزميات",
+    "history": "السجل",
+    "profile": "حسابي",
+    "login": "دخول",
+    "logout": "خروج"
+  },
   "tax": {
     "encryption": "التشفير",
     "symmetric": "تناظرية",
@@ -25,9 +33,21 @@
   "features": {
     "eyebrow": "لماذا SecSim",
     "items": [
-      { "icon": "fa-solid fa-shield-halved", "title": "محاكاة خطوة بخطوة", "text": "كل عملية تحوّل موثقة ومعروضة: الدخل، العملية، والخرج." },
-      { "icon": "fa-solid fa-magnifying-glass-chart", "title": "تحليل أمني", "text": "نقاط القوة والضعف ومساحة المفاتيح لكل خوارزمية." },
-      { "icon": "fa-solid fa-gauge-high", "title": "قياس الأداء", "text": "زمن التنفيذ وعدد الخطوات مع رسوم بيانية للمقارنة." }
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "title": "محاكاة خطوة بخطوة",
+        "text": "كل عملية تحوّل موثقة ومعروضة: الدخل، العملية، والخرج."
+      },
+      {
+        "icon": "fa-solid fa-magnifying-glass-chart",
+        "title": "تحليل أمني",
+        "text": "نقاط القوة والضعف ومساحة المفاتيح لكل خوارزمية."
+      },
+      {
+        "icon": "fa-solid fa-gauge-high",
+        "title": "قياس الأداء",
+        "text": "زمن التنفيذ وعدد الخطوات مع رسوم بيانية للمقارنة."
+      }
     ]
   },
   "home": {
@@ -106,12 +126,31 @@
     "back": "عودة للرئيسية",
     "opensource": "مشروع مفتوح المصدر — حر للتعلم والمساهمة",
     "points": [
-      { "icon": "fa-solid fa-shield-halved", "title": "تعلّم بالتجربة", "text": "نفّذ الخوارزميات حرفاً بحرف" },
-      { "icon": "fa-solid fa-clock-rotate-left", "title": "سجل محفوظ", "text": "كل محاكاة تجريها تبقى في حسابك" },
-      { "icon": "fa-solid fa-code-branch", "title": "مفتوح المصدر", "text": "الكود متاح للجميع للقراءة والتطوير" }
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "title": "تعلّم بالتجربة",
+        "text": "نفّذ الخوارزميات حرفاً بحرف"
+      },
+      {
+        "icon": "fa-solid fa-clock-rotate-left",
+        "title": "سجل محفوظ",
+        "text": "كل محاكاة تجريها تبقى في حسابك"
+      },
+      {
+        "icon": "fa-solid fa-code-branch",
+        "title": "مفتوح المصدر",
+        "text": "الكود متاح للجميع للقراءة والتطوير"
+      }
     ]
   },
-  "history": { "title": "سجل المحاكيات", "subtitle": "كل تجربة نفذتها بحسابك محفوظة هنا", "empty": "لا يوجد سجل بعد. نفّذ أول محاكاة من صفحة المحاكاة.", "login_required": "سجّل الدخول لعرض سجلك المحفوظ", "steps": "خطوة", "go": "ابدأ محاكاة جديدة" },
+  "history": {
+    "title": "سجل المحاكيات",
+    "subtitle": "كل تجربة نفذتها بحسابك محفوظة هنا",
+    "empty": "لا يوجد سجل بعد. نفّذ أول محاكاة من صفحة المحاكاة.",
+    "login_required": "سجّل الدخول لعرض سجلك المحفوظ",
+    "steps": "خطوة",
+    "go": "ابدأ محاكاة جديدة"
+  },
   "profile": { "joined": "عضو منذ", "sims": "محاكاة محفوظة", "view_history": "عرض السجل" },
   "footer": {
     "tag": "تعلّم الأمن بفكّ شيفرته",

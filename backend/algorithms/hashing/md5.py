@@ -11,6 +11,7 @@ Contract: exposes ``COMPLEXITY`` / ``DETAILS`` / ``simulate()`` /
 file (see :mod:`app.services.registry`). Never use for passwords,
 signatures or integrity that matters.
 """
+
 import hashlib
 
 from app.services.registry import register
@@ -57,8 +58,16 @@ DETAILS = {
         "en": "Practically broken: engineered collisions in seconds on commodity hardware. Forbidden for passwords, signatures and certificates — use SHA-256 at minimum. Its only acceptable remnant: non-security checksums in legacy systems.",
     },
     "uses": {
-        "ar": ["بصمات ملفات قديمة (غير أمنية)", "مقارنة تعليمية مع SHA-256 في هذه المنصة", "تحديد مكررات في أنظمة أرشيف قديمة"],
-        "en": ["Legacy file fingerprints (non-security)", "Teaching comparison with SHA-256 on this platform", "Duplicate detection in old archives"],
+        "ar": [
+            "بصمات ملفات قديمة (غير أمنية)",
+            "مقارنة تعليمية مع SHA-256 في هذه المنصة",
+            "تحديد مكررات في أنظمة أرشيف قديمة",
+        ],
+        "en": [
+            "Legacy file fingerprints (non-security)",
+            "Teaching comparison with SHA-256 on this platform",
+            "Duplicate detection in old archives",
+        ],
     },
 }
 
@@ -158,8 +167,14 @@ def analyze(extra=None):
             "en": ["Fast, fine for non-security checksums"],
         },
         "weaknesses": {
-            "ar": ["مكسور عملياً: تصادمات متعمدة خلال ثوانٍ", "ممنوع للكلمات والتوقيعات — استخدم SHA-256 على الأقل"],
-            "en": ["Practically broken: engineered collisions in seconds", "Forbidden for passwords/signatures — use SHA-256+"],
+            "ar": [
+                "مكسور عملياً: تصادمات متعمدة خلال ثوانٍ",
+                "ممنوع للكلمات والتوقيعات — استخدم SHA-256 على الأقل",
+            ],
+            "en": [
+                "Practically broken: engineered collisions in seconds",
+                "Forbidden for passwords/signatures — use SHA-256+",
+            ],
         },
         "metrics": {"digest_bits": 128, "status": "broken"},
         "complexity": COMPLEXITY,

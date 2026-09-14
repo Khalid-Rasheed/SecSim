@@ -14,10 +14,12 @@ Token model: a signed JWT whose identity is the user's numeric id
 The frontend stores it in ``localStorage`` and sends it as
 ``Authorization: Bearer <token>``.
 """
+
 import re
 
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+
 from app import db, limiter
 from app.models.user import User
 

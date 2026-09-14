@@ -2,11 +2,15 @@
   <header class="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-[rgba(15,23,42,0.08)]">
     <nav class="max-w-6xl mx-auto px-4 h-16 flex items-center gap-1">
       <router-link to="/" class="flex items-center gap-2.5 me-4">
-        <span class="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-pop"
-          style="background: linear-gradient(135deg, #0d9488, #0f766e)">
+        <span
+          class="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-pop"
+          style="background: linear-gradient(135deg, #0d9488, #0f766e)"
+        >
           <i class="fa-solid fa-lock text-sm"></i>
         </span>
-        <span class="font-display font-extrabold text-lg tracking-tight text-mist" dir="ltr">SecSim<span class="text-teal-600">_</span></span>
+        <span class="font-display font-extrabold text-lg tracking-tight text-mist" dir="ltr"
+          >SecSim<span class="text-teal-600">_</span></span
+        >
       </router-link>
 
       <router-link to="/" class="navlink text-sm hidden sm:inline-block">
@@ -18,13 +22,28 @@
 
       <!-- ALGORITHMS DROPDOWN: Encryption (symmetric/asymmetric tree) + hashing + attacks -->
       <div class="relative hidden sm:inline-block" @keydown.escape="closeMenu">
-        <button @click="toggleMenu" :aria-expanded="open" aria-haspopup="true"
-          :class="['navlink text-sm font-semibold inline-flex items-center', open ? '!text-teal-700 bg-teal-700/10' : '']">
+        <button
+          :aria-expanded="open"
+          aria-haspopup="true"
+          :class="[
+            'navlink text-sm font-semibold inline-flex items-center',
+            open ? '!text-teal-700 bg-teal-700/10' : ''
+          ]"
+          @click="toggleMenu"
+        >
           <i class="fa-solid fa-layer-group me-1.5 text-xs"></i>{{ $t('nav.algorithms') }}
-          <i :class="['fa-solid fa-chevron-down ms-1.5 text-[0.6rem] transition-transform', open ? 'rotate-180' : '']"></i>
+          <i
+            :class="[
+              'fa-solid fa-chevron-down ms-1.5 text-[0.6rem] transition-transform',
+              open ? 'rotate-180' : ''
+            ]"
+          ></i>
         </button>
 
-        <div v-if="open" class="absolute start-0 top-full mt-2 w-[21rem] max-w-[90vw] bg-white border border-[rgba(15,23,42,0.1)] rounded-2xl shadow-card p-2 z-50 max-h-[70vh] overflow-y-auto">
+        <div
+          v-if="open"
+          class="absolute start-0 top-full mt-2 w-[21rem] max-w-[90vw] bg-white border border-[rgba(15,23,42,0.1)] rounded-2xl shadow-card p-2 z-50 max-h-[70vh] overflow-y-auto"
+        >
           <p v-if="menuLoading" class="text-xs text-muted px-3 py-4 text-center">
             <i class="fa-solid fa-circle-notch fa-spin me-1.5"></i>{{ $t('sim.brief_loading') }}
           </p>
@@ -37,9 +56,13 @@
               <p class="px-3 py-1 text-[0.7rem] font-bold text-teal-700">{{ $t('tax.' + fam.family) }}</p>
               <div v-for="g in fam.kinds" :key="g.kind" class="mb-1">
                 <p class="px-3 text-[0.65rem] text-muted font-semibold">{{ $t('tax.' + g.kind) }}</p>
-                <router-link v-for="a in g.items" :key="a.id"
-                  :to="{ path: '/simulator', query: { algo: a.id } }" @click="closeMenu"
-                  class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-teal-700/5 transition">
+                <router-link
+                  v-for="a in g.items"
+                  :key="a.id"
+                  :to="{ path: '/simulator', query: { algo: a.id } }"
+                  class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-teal-700/5 transition"
+                  @click="closeMenu"
+                >
                   <i :class="[algoIcon(a.type), 'text-teal-600 text-xs w-4 text-center']"></i>
                   <span class="font-mono text-xs font-bold text-mist" dir="ltr">{{ a.id }}</span>
                   <span class="text-[0.7rem] text-muted truncate">{{ a.name?.[locale] || '' }}</span>
@@ -52,9 +75,13 @@
               <p class="px-3 pt-2 pb-1 text-[0.68rem] font-extrabold text-mist uppercase tracking-wide">
                 <i :class="[sec.icon, 'me-1.5', sec.color]"></i>{{ $t('tax.' + sec.key) }}
               </p>
-              <router-link v-for="a in sec.items" :key="a.id"
-                :to="{ path: '/simulator', query: { algo: a.id } }" @click="closeMenu"
-                class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-teal-700/5 transition">
+              <router-link
+                v-for="a in sec.items"
+                :key="a.id"
+                :to="{ path: '/simulator', query: { algo: a.id } }"
+                class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-teal-700/5 transition"
+                @click="closeMenu"
+              >
                 <i :class="[algoIcon(a.type), 'text-teal-600 text-xs w-4 text-center']"></i>
                 <span class="font-mono text-xs font-bold text-mist" dir="ltr">{{ a.id }}</span>
                 <span class="text-[0.7rem] text-muted truncate">{{ a.name?.[locale] || '' }}</span>
@@ -73,13 +100,15 @@
 
       <span class="flex-1"></span>
 
-      <button @click="toggleLang" class="btn-ghost text-xs px-3 py-2 font-bold" dir="ltr">
+      <button class="btn-ghost text-xs px-3 py-2 font-bold" dir="ltr" @click="toggleLang">
         <i class="fa-solid fa-language me-1 text-teal-700"></i>{{ locale === 'ar' ? 'EN' : 'عربي' }}
       </button>
 
       <template v-if="auth.isLoggedIn">
-        <span class="hidden md:inline text-xs text-muted font-mono max-w-[180px] truncate" dir="ltr">{{ auth.user?.email }}</span>
-        <button @click="auth.logout()" class="btn-ghost text-xs font-bold px-3 py-2">
+        <span class="hidden md:inline text-xs text-muted font-mono max-w-[180px] truncate" dir="ltr">{{
+          auth.user?.email
+        }}</span>
+        <button class="btn-ghost text-xs font-bold px-3 py-2" @click="auth.logout()">
           <i class="fa-solid fa-right-from-bracket me-1 text-teal-700"></i>{{ $t('nav.logout') }}
         </button>
       </template>

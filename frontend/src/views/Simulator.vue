@@ -6,7 +6,9 @@
 
     <!-- SELECTED ALGORITHM MASTHEAD -->
     <div class="panel px-6 py-5 mb-4 flex items-center gap-4 flex-wrap">
-      <span class="w-14 h-14 rounded-2xl bg-cipher/10 border border-cipher/30 flex items-center justify-center shrink-0">
+      <span
+        class="w-14 h-14 rounded-2xl bg-cipher/10 border border-cipher/30 flex items-center justify-center shrink-0"
+      >
         <i :class="[algoIcon(store.currentMeta?.type || 'encryption'), 'text-cipher text-2xl']"></i>
       </span>
       <div class="flex-1 min-w-[200px]">
@@ -14,9 +16,14 @@
         <h2 class="font-display font-bold text-3xl md:text-4xl tracking-tight leading-none" dir="ltr">
           {{ store.currentMeta?.name?.en || store.algorithm }}
         </h2>
-        <p v-if="store.currentMeta?.name?.ar" class="text-lg font-semibold mt-1">{{ store.currentMeta.name.ar }}</p>
+        <p v-if="store.currentMeta?.name?.ar" class="text-lg font-semibold mt-1">
+          {{ store.currentMeta.name.ar }}
+        </p>
       </div>
-      <span class="font-mono text-xs px-3 py-1.5 rounded-lg bg-cipher/10 border border-cipher/30 text-cipher" dir="ltr">
+      <span
+        class="font-mono text-xs px-3 py-1.5 rounded-lg bg-cipher/10 border border-cipher/30 text-cipher"
+        dir="ltr"
+      >
         {{ taxBreadcrumb }}
       </span>
     </div>
@@ -40,18 +47,31 @@
                 <button
                   v-for="a in grp.items"
                   :key="a.id"
+                  :class="[
+                    'panel-flat p-3 text-start transition',
+                    store.algorithm === a.id ? '!border-cipher bg-cipher/10' : 'hover:border-muted'
+                  ]"
                   @click="store.algorithm = a.id"
-                  :class="['panel-flat p-3 text-start transition', store.algorithm === a.id ? '!border-cipher bg-cipher/10' : 'hover:border-muted']"
                 >
-                  <i :class="[algoIcon(a.type), 'text-xs mb-1.5', store.algorithm === a.id ? 'text-cipher' : 'text-muted']"></i>
+                  <i
+                    :class="[
+                      algoIcon(a.type),
+                      'text-xs mb-1.5',
+                      store.algorithm === a.id ? 'text-cipher' : 'text-muted'
+                    ]"
+                  ></i>
                   <div class="font-display font-semibold text-sm" dir="ltr">{{ a.id }}</div>
                   <div class="text-[0.7rem] text-muted font-mono" dir="ltr">{{ a.kind || a.type }}</div>
                 </button>
               </div>
             </div>
           </div>
-          <router-link :to="'/algorithms/' + store.algorithm" class="text-xs text-cipher hover:underline mt-2 inline-block">
-            <i class="fa-solid fa-book-open me-1"></i>{{ $t('alg.learn_more') }}: <span class="font-mono" dir="ltr">{{ store.algorithm }}</span>
+          <router-link
+            :to="'/algorithms/' + store.algorithm"
+            class="text-xs text-cipher hover:underline mt-2 inline-block"
+          >
+            <i class="fa-solid fa-book-open me-1"></i>{{ $t('alg.learn_more') }}:
+            <span class="font-mono" dir="ltr">{{ store.algorithm }}</span>
           </router-link>
         </div>
 
@@ -60,23 +80,41 @@
           <div class="flex items-center gap-2 mb-2">
             <i :class="[algoIcon(store.currentMeta.type), 'text-cipher text-sm']"></i>
             <h2 class="text-sm font-semibold">{{ $t('sim.brief') }}</h2>
-            <span class="ms-auto font-mono text-[0.65rem] px-2 py-0.5 rounded bg-cipher/10 border border-cipher/30 text-cipher" dir="ltr">
+            <span
+              class="ms-auto font-mono text-[0.65rem] px-2 py-0.5 rounded bg-cipher/10 border border-cipher/30 text-cipher"
+              dir="ltr"
+            >
               {{ store.currentMeta.type }}
             </span>
           </div>
-          <p v-if="briefText" class="text-xs text-mist/90 leading-relaxed line-clamp-3 mb-2">{{ briefText }}</p>
+          <p v-if="briefText" class="text-xs text-mist/90 leading-relaxed line-clamp-3 mb-2">
+            {{ briefText }}
+          </p>
           <p v-else class="text-xs text-muted mb-2">
             <i class="fa-solid fa-circle-notch fa-spin me-1"></i>{{ $t('sim.brief_loading') }}
           </p>
           <div v-if="store.currentMeta.complexity" class="flex gap-1.5 flex-wrap mb-3" dir="ltr">
-            <span class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-cipher/10 border border-cipher/30 text-cipher">T: {{ store.currentMeta.complexity.time }}</span>
-            <span class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-keyamber/10 border border-keyamber/30 text-keyamber">S: {{ store.currentMeta.complexity.space }}</span>
+            <span
+              class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-cipher/10 border border-cipher/30 text-cipher"
+              >T: {{ store.currentMeta.complexity.time }}</span
+            >
+            <span
+              class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-keyamber/10 border border-keyamber/30 text-keyamber"
+              >S: {{ store.currentMeta.complexity.space }}</span
+            >
           </div>
           <div class="flex gap-2">
-            <button @click="store.fillExample()" :disabled="store.loading" class="btn-ghost flex-1 py-2 text-xs disabled:opacity-50">
+            <button
+              :disabled="store.loading"
+              class="btn-ghost flex-1 py-2 text-xs disabled:opacity-50"
+              @click="store.fillExample()"
+            >
               <i class="fa-solid fa-wand-magic-sparkles me-1.5"></i>{{ $t('sim.example') }}
             </button>
-            <router-link :to="'/algorithms/' + store.algorithm" class="btn-ghost flex-1 py-2 text-xs text-center">
+            <router-link
+              :to="'/algorithms/' + store.algorithm"
+              class="btn-ghost flex-1 py-2 text-xs text-center"
+            >
               <i class="fa-solid fa-book-open me-1.5"></i>{{ $t('alg.learn_more') }}
             </router-link>
           </div>
@@ -87,11 +125,20 @@
             <i class="fa-solid fa-keyboard text-cipher me-2"></i>{{ $t('sim.input') }}
           </h2>
           <label class="block text-xs text-muted mb-1.5">{{ $t('sim.text') }}</label>
-          <input v-model="store.input" @keyup.enter="store.run()" class="field w-full px-3 py-2.5 text-sm font-mono mb-1" dir="ltr" placeholder="Hello World" />
+          <input
+            v-model="store.input"
+            class="field w-full px-3 py-2.5 text-sm font-mono mb-1"
+            dir="ltr"
+            placeholder="Hello World"
+            @keyup.enter="store.run()"
+          />
           <p v-if="store.algorithm === 'brute_force'" class="text-[0.7rem] text-keyamber mb-4">
             <i class="fa-solid fa-burst me-1"></i>{{ $t('sim.attack_hint') }}
           </p>
-          <p v-else-if="store.algorithm === 'rsa' && store.mode === 'decrypt'" class="text-[0.7rem] text-keyamber mb-4">
+          <p
+            v-else-if="store.algorithm === 'rsa' && store.mode === 'decrypt'"
+            class="text-[0.7rem] text-keyamber mb-4"
+          >
             <i class="fa-solid fa-circle-info me-1"></i>{{ $t('sim.rsa_decrypt_hint') }}
           </p>
           <p v-else-if="store.algorithm === 'rsa'" class="text-[0.7rem] text-muted mb-4">
@@ -100,7 +147,14 @@
           <div v-else class="mb-4"></div>
           <div v-if="store.algorithm === 'caesar'" class="mb-4">
             <label class="block text-xs text-muted mb-1.5">{{ $t('sim.key') }}</label>
-            <input v-model.number="store.key" type="number" min="0" max="25" class="field w-full px-3 py-2.5 text-sm font-mono" dir="ltr" />
+            <input
+              v-model.number="store.key"
+              type="number"
+              min="0"
+              max="25"
+              class="field w-full px-3 py-2.5 text-sm font-mono"
+              dir="ltr"
+            />
           </div>
           <div v-if="['caesar', 'aes', 'rsa'].includes(store.algorithm)" class="mb-4">
             <label class="block text-xs text-muted mb-1.5">{{ $t('sim.mode') }}</label>
@@ -112,11 +166,19 @@
           <div v-if="store.algorithm === 'aes'" class="grid grid-cols-2 gap-3 mb-4">
             <div class="col-span-2">
               <label class="block text-xs text-muted mb-1.5">{{ $t('sim.key_text') }}</label>
-              <input v-model="store.aesKeyText" class="field w-full px-3 py-2.5 text-sm font-mono" dir="ltr" />
+              <input
+                v-model="store.aesKeyText"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
             </div>
             <div class="col-span-2">
               <label class="block text-xs text-muted mb-1.5">{{ $t('sim.key_size') }}</label>
-              <select v-model.number="store.aesKeySize" class="field w-full px-3 py-2.5 text-sm font-mono" dir="ltr">
+              <select
+                v-model.number="store.aesKeySize"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              >
                 <option :value="128">128</option>
                 <option :value="192">192</option>
                 <option :value="256">256</option>
@@ -126,18 +188,37 @@
           <div v-if="store.algorithm === 'rsa'" class="grid grid-cols-3 gap-3 mb-4">
             <div>
               <label class="block text-xs text-muted mb-1.5" dir="ltr">p</label>
-              <input v-model.number="store.rsaP" type="number" class="field w-full px-3 py-2.5 text-sm font-mono" dir="ltr" />
+              <input
+                v-model.number="store.rsaP"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
             </div>
             <div>
               <label class="block text-xs text-muted mb-1.5" dir="ltr">q</label>
-              <input v-model.number="store.rsaQ" type="number" class="field w-full px-3 py-2.5 text-sm font-mono" dir="ltr" />
+              <input
+                v-model.number="store.rsaQ"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
             </div>
             <div>
               <label class="block text-xs text-muted mb-1.5" dir="ltr">e</label>
-              <input v-model.number="store.rsaE" type="number" class="field w-full px-3 py-2.5 text-sm font-mono" dir="ltr" />
+              <input
+                v-model.number="store.rsaE"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
             </div>
           </div>
-          <button @click="store.run()" :disabled="store.loading" class="btn-cipher w-full py-3 text-sm disabled:opacity-50">
+          <button
+            :disabled="store.loading"
+            class="btn-cipher w-full py-3 text-sm disabled:opacity-50"
+            @click="store.run()"
+          >
             <i v-if="store.loading" class="fa-solid fa-circle-notch fa-spin me-2"></i>
             <i v-else class="fa-solid fa-play me-2"></i>{{ $t('sim.run') }}
           </button>
@@ -159,13 +240,17 @@
           <div v-if="store.result" class="panel-flat p-4 mb-1">
             <div class="flex items-center justify-between mb-1.5">
               <p class="text-xs text-muted">{{ $t('sim.result') }}</p>
-              <button @click="copyResult()" class="btn-ghost px-2 py-1 text-[0.7rem]">
-                <i :class="['me-1', copied ? 'fa-solid fa-check text-cipher' : 'fa-solid fa-copy']"></i>{{ copied ? $t('sim.copied') : $t('sim.copy') }}
+              <button class="btn-ghost px-2 py-1 text-[0.7rem]" @click="copyResult()">
+                <i :class="['me-1', copied ? 'fa-solid fa-check text-cipher' : 'fa-solid fa-copy']"></i
+                >{{ copied ? $t('sim.copied') : $t('sim.copy') }}
               </button>
             </div>
             <p class="font-mono text-cipher break-all" dir="ltr">{{ store.result }}</p>
           </div>
-          <div v-if="store.warning" class="flex items-start gap-2 bg-amber-50 border border-amber-300 text-amber-800 text-xs font-semibold rounded-xl px-3.5 py-3 mt-3">
+          <div
+            v-if="store.warning"
+            class="flex items-start gap-2 bg-amber-50 border border-amber-300 text-amber-800 text-xs font-semibold rounded-xl px-3.5 py-3 mt-3"
+          >
             <i class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0"></i>
             <span>{{ store.warning[locale] || store.warning.en }}</span>
           </div>
@@ -259,7 +344,9 @@ async function copyResult() {
     ta.remove()
   }
   copied.value = true
-  setTimeout(() => { copied.value = false }, 1500)
+  setTimeout(() => {
+    copied.value = false
+  }, 1500)
 }
 watch(
   () => store.algorithm,
@@ -270,7 +357,11 @@ watch(
   }
 )
 onMounted(async () => {
-  try { await store.fetchAlgorithms() } catch { /* offline */ }
+  try {
+    await store.fetchAlgorithms()
+  } catch {
+    /* offline */
+  }
   const preset = route.query.algo
   if (preset && store.algorithms.some((a) => a.id === preset)) store.algorithm = preset
   await store.fetchDetails()

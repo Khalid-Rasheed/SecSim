@@ -11,8 +11,10 @@ Both read from the self-registering :mod:`app.services.registry`
 (via :mod:`app.services.simulator`), so adding a module file under
 ``algorithms/`` automatically extends this catalog — no route edits.
 """
+
 from flask import Blueprint, jsonify
-from app.services.simulator import list_algorithms, get_algorithm_detail
+
+from app.services.simulator import get_algorithm_detail, list_algorithms
 
 algorithms_bp = Blueprint("algorithms", __name__)
 

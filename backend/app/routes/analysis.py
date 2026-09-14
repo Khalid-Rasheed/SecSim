@@ -5,7 +5,9 @@ Route:
     (strengths, weaknesses, metrics, complexity) for an algorithm —
     useful for theory pages that need no input text and no step trace.
 """
-from flask import Blueprint, request, jsonify
+
+from flask import Blueprint, jsonify, request
+
 from app.services.simulator import analyze_algorithm, list_algorithms
 
 analysis_bp = Blueprint("analysis", __name__)

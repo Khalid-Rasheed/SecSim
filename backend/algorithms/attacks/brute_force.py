@@ -13,8 +13,8 @@ Contract: exposes ``COMPLEXITY`` / ``DETAILS`` / ``simulate()`` /
 ``analyze()`` and self-registers as ``"brute_force"`` at the bottom
 of this file (see :mod:`app.services.registry`).
 """
-from algorithms.encryption.caesar import _shift_char
 
+from algorithms.encryption.caesar import _shift_char
 from app.services.registry import register
 
 COMPLEXITY = {
@@ -52,24 +52,62 @@ DETAILS = {
     },
     "parameters": {
         "ar": [{"name": "input", "desc": "نص مشفر بقيصر (إنجليزي بطول معقول لأدق نتيجة)."}],
-        "en": [{"name": "input", "desc": "Caesar ciphertext (reasonably long English for best accuracy)."}],
+        "en": [
+            {
+                "name": "input",
+                "desc": "Caesar ciphertext (reasonably long English for best accuracy).",
+            }
+        ],
     },
     "security": {
         "ar": "الدرس المركزي في علم التشفير: الأمان = مساحة مفاتيح هائلة. 25 مفتاحاً تُكسر فوراً، و2^128 (كـ AES) تحتاج طاقة تفوق ما في الكون المنظور. ومبدأ كيركهوفس: افترض أن المهاجم يعرف كل شيء عدا المفتاح.",
         "en": "Cryptography's central lesson: security = an enormous keyspace. 25 keys fall instantly, while 2^128 (like AES) needs more energy than the observable universe holds. And Kerckhoffs's principle: assume the attacker knows everything except the key.",
     },
     "uses": {
-        "ar": ["تدقيق الشيفرات الضعيفة", "عروض CTF ومسابقات الاختراق", "كسر كلمات المرور الضعيفة (بأدوات مخصصة)", "إثبات الحاجة لمساحات مفاتيح كبيرة"],
-        "en": ["Auditing weak ciphers", "CTF and hacking competitions", "Weak-password cracking (with dedicated tools)", "Proving the need for huge keyspaces"],
+        "ar": [
+            "تدقيق الشيفرات الضعيفة",
+            "عروض CTF ومسابقات الاختراق",
+            "كسر كلمات المرور الضعيفة (بأدوات مخصصة)",
+            "إثبات الحاجة لمساحات مفاتيح كبيرة",
+        ],
+        "en": [
+            "Auditing weak ciphers",
+            "CTF and hacking competitions",
+            "Weak-password cracking (with dedicated tools)",
+            "Proving the need for huge keyspaces",
+        ],
     },
 }
 
 # Standard English letter frequencies in percent, a-z order
 # (source: classical cryptanalysis tables). Index i ↔ chr(ord('a')+i).
 ENGLISH_FREQ = [
-    8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966,
-    0.153, 0.772, 4.025, 2.406, 6.749, 7.507, 1.929, 0.095, 5.987,
-    6.327, 9.056, 2.758, 0.978, 2.360, 0.150, 1.974, 0.074,
+    8.167,
+    1.492,
+    2.782,
+    4.253,
+    12.702,
+    2.228,
+    2.015,
+    6.094,
+    6.966,
+    0.153,
+    0.772,
+    4.025,
+    2.406,
+    6.749,
+    7.507,
+    1.929,
+    0.095,
+    5.987,
+    6.327,
+    9.056,
+    2.758,
+    0.978,
+    2.360,
+    0.150,
+    1.974,
+    0.074,
 ]
 
 
@@ -87,9 +125,30 @@ def _chi_squared(text: str) -> float:
 
 
 COMMON_WORDS = {
-    "the", "and", "hello", "world", "quick", "brown", "fox", "jumps",
-    "over", "lazy", "dog", "this", "that", "with", "from", "have",
-    "security", "attack", "cipher", "key", "test", "message", "is", "it",
+    "the",
+    "and",
+    "hello",
+    "world",
+    "quick",
+    "brown",
+    "fox",
+    "jumps",
+    "over",
+    "lazy",
+    "dog",
+    "this",
+    "that",
+    "with",
+    "from",
+    "have",
+    "security",
+    "attack",
+    "cipher",
+    "key",
+    "test",
+    "message",
+    "is",
+    "it",
 }
 
 

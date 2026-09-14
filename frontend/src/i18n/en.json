@@ -1,7 +1,15 @@
 {
   "app": "SecSim",
   "tagline": "Interactive platform for simulating and analyzing security algorithms",
-  "nav": { "home": "Home", "simulator": "Simulator", "algorithms": "Algorithms", "history": "History", "profile": "Profile", "login": "Login", "logout": "Logout" },
+  "nav": {
+    "home": "Home",
+    "simulator": "Simulator",
+    "algorithms": "Algorithms",
+    "history": "History",
+    "profile": "Profile",
+    "login": "Login",
+    "logout": "Logout"
+  },
   "tax": {
     "encryption": "Encryption",
     "symmetric": "Symmetric",
@@ -25,9 +33,21 @@
   "features": {
     "eyebrow": "Why SecSim",
     "items": [
-      { "icon": "fa-solid fa-shield-halved", "title": "Step-by-step simulation", "text": "Every transformation is logged and shown: input, operation, output." },
-      { "icon": "fa-solid fa-magnifying-glass-chart", "title": "Security analysis", "text": "Strengths, weaknesses and keyspace for each algorithm." },
-      { "icon": "fa-solid fa-gauge-high", "title": "Performance metrics", "text": "Execution time and step counts with charts for comparison." }
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "title": "Step-by-step simulation",
+        "text": "Every transformation is logged and shown: input, operation, output."
+      },
+      {
+        "icon": "fa-solid fa-magnifying-glass-chart",
+        "title": "Security analysis",
+        "text": "Strengths, weaknesses and keyspace for each algorithm."
+      },
+      {
+        "icon": "fa-solid fa-gauge-high",
+        "title": "Performance metrics",
+        "text": "Execution time and step counts with charts for comparison."
+      }
     ]
   },
   "home": {
@@ -106,12 +126,31 @@
     "back": "Back to home",
     "opensource": "Open-source project — free to learn and contribute",
     "points": [
-      { "icon": "fa-solid fa-shield-halved", "title": "Learn by doing", "text": "Run algorithms character by character" },
-      { "icon": "fa-solid fa-clock-rotate-left", "title": "Saved history", "text": "Every simulation stays in your account" },
-      { "icon": "fa-solid fa-code-branch", "title": "Open source", "text": "Code is open for everyone to read and improve" }
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "title": "Learn by doing",
+        "text": "Run algorithms character by character"
+      },
+      {
+        "icon": "fa-solid fa-clock-rotate-left",
+        "title": "Saved history",
+        "text": "Every simulation stays in your account"
+      },
+      {
+        "icon": "fa-solid fa-code-branch",
+        "title": "Open source",
+        "text": "Code is open for everyone to read and improve"
+      }
     ]
   },
-  "history": { "title": "Simulation history", "subtitle": "Every experiment you ran with your account lives here", "empty": "No history yet. Run your first simulation from the simulator page.", "login_required": "Login to see your saved history", "steps": "steps", "go": "Start a new simulation" },
+  "history": {
+    "title": "Simulation history",
+    "subtitle": "Every experiment you ran with your account lives here",
+    "empty": "No history yet. Run your first simulation from the simulator page.",
+    "login_required": "Login to see your saved history",
+    "steps": "steps",
+    "go": "Start a new simulation"
+  },
   "profile": { "joined": "Member since", "sims": "saved simulations", "view_history": "View history" },
   "footer": {
     "tag": "Learn security by breaking it open",

@@ -58,7 +58,10 @@ DETAILS = {
         "en": [
             {"name": "p & q", "desc": "Two primes (default 61 and 53 → n=3233, teaching only)."},
             {"name": "e", "desc": "Public exponent (default 17, must be coprime to φ)."},
-            {"name": "mode", "desc": "encrypt for plaintext or decrypt for space-separated values."},
+            {
+                "name": "mode",
+                "desc": "encrypt for plaintext or decrypt for space-separated values.",
+            },
         ],
     },
     "security": {
@@ -66,8 +69,18 @@ DETAILS = {
         "en": "These toy keys (12 bits) factor almost mentally. Reality needs 2048+ bits and OAEP padding (raw encryption leaks frequency, as the simulator shows) plus timing-attack defenses. Quantum computing (Shor's algorithm) threatens it in theory long-term.",
     },
     "uses": {
-        "ar": ["تبادل مفاتيح الجلسات", "التوقيعات الرقمية والشهادات", "البريد المشفر", "المصادقة في البطاقات الذكية"],
-        "en": ["Session-key exchange", "Digital signatures and certificates", "Encrypted email", "Smart-card authentication"],
+        "ar": [
+            "تبادل مفاتيح الجلسات",
+            "التوقيعات الرقمية والشهادات",
+            "البريد المشفر",
+            "المصادقة في البطاقات الذكية",
+        ],
+        "en": [
+            "Session-key exchange",
+            "Digital signatures and certificates",
+            "Encrypted email",
+            "Smart-card authentication",
+        ],
     },
 }
 
@@ -198,7 +211,7 @@ def simulate(text: str, key=17, mode: str = "encrypt", extra=None):
         try:
             cipher = [int(x) for x in (text or "").replace(",", " ").split()]
         except Exception:
-            raise ValueError("decrypt expects space/comma separated integers")
+            raise ValueError("decrypt expects space/comma separated integers") from None
         chars = []
         for i, c in enumerate(cipher):
             m = pow(c, d, n)
@@ -233,9 +246,7 @@ def simulate(text: str, key=17, mode: str = "encrypt", extra=None):
     for i, ch in enumerate(text or ""):
         m = ord(ch)
         if m >= n:
-            raise ValueError(
-                f"char {ch!r} (code {m}) needs n > {m} — increase primes p and q"
-            )
+            raise ValueError(f"char {ch!r} (code {m}) needs n > {m} — increase primes p and q")
         c = pow(m, e, n)
         chars.append(c)
         steps.append(
@@ -256,7 +267,10 @@ def simulate(text: str, key=17, mode: str = "encrypt", extra=None):
         {
             "index": len(steps),
             "title": {"ar": "النتيجة المشفرة", "en": "Encrypted result"},
-            "description": {"ar": "القيم مفصولة بمسافات — انسخها لفك التشفير", "en": "Space-separated values — copy them to decrypt"},
+            "description": {
+                "ar": "القيم مفصولة بمسافات — انسخها لفك التشفير",
+                "en": "Space-separated values — copy them to decrypt",
+            },
             "snapshot": {"result": result, "public_key": {"e": e, "n": n}},
             "highlight": [],
             "meta": {"phase": "done"},
@@ -283,11 +297,22 @@ def analyze(extra=None):
     return {
         "strengths": {
             "ar": ["الأمان مبني على صعوبة تحليل الأعداد الكبيرة", "المفتاح العام يُنشر بأمان"],
-            "en": ["Security rests on hardness of factoring large numbers", "Public key can be shared openly"],
+            "en": [
+                "Security rests on hardness of factoring large numbers",
+                "Public key can be shared openly",
+            ],
         },
         "weaknesses": {
-            "ar": [f"هذه المفاتيح التعليمية ({bits} بت) تُكسر فوراً بالتحليل", "الاستخدام الحقيقي يتطلب 2048+ بت وحشو OAEP", "التشفير حرفاً بحرف يسرب التكرار"],
-            "en": [f"These toy keys ({bits} bits) factor instantly", "Real use needs 2048+ bits and OAEP padding", "Char-by-char encryption leaks frequency"],
+            "ar": [
+                f"هذه المفاتيح التعليمية ({bits} بت) تُكسر فوراً بالتحليل",
+                "الاستخدام الحقيقي يتطلب 2048+ بت وحشو OAEP",
+                "التشفير حرفاً بحرف يسرب التكرار",
+            ],
+            "en": [
+                f"These toy keys ({bits} bits) factor instantly",
+                "Real use needs 2048+ bits and OAEP padding",
+                "Char-by-char encryption leaks frequency",
+            ],
         },
         "metrics": {"n_bits": bits, "real_world_min_bits": 2048},
         "complexity": COMPLEXITY,

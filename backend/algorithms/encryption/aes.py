@@ -17,6 +17,7 @@ zero-padded/truncated to key length) to keep the demo readable. Real
 systems must use cryptographically random keys and authenticated modes
 (e.g. GCM) — never copy this key derivation.
 """
+
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 
@@ -61,14 +62,29 @@ DETAILS = {
     },
     "parameters": {
         "ar": [
-            {"name": "key_text", "desc": "نص المفتاح (يُكيَّف لطول الحجم المطلوب — للتعليم فقط، والصحيح توليد عشوائي آمن)."},
-            {"name": "key_size", "desc": "طول المفتاح بالبت: 128 (10 جولات) أو 192 (12) أو 256 (14)."},
+            {
+                "name": "key_text",
+                "desc": "نص المفتاح (يُكيَّف لطول الحجم المطلوب — للتعليم فقط، والصحيح توليد عشوائي آمن).",
+            },
+            {
+                "name": "key_size",
+                "desc": "طول المفتاح بالبت: 128 (10 جولات) أو 192 (12) أو 256 (14).",
+            },
             {"name": "mode", "desc": "encrypt للتشفير أو decrypt لفك صيغة iv_hex:cipher_hex."},
         ],
         "en": [
-            {"name": "key_text", "desc": "Key text (fit to the required size — teaching only; real keys must be securely random)."},
-            {"name": "key_size", "desc": "Key length in bits: 128 (10 rounds), 192 (12) or 256 (14)."},
-            {"name": "mode", "desc": "encrypt to encipher or decrypt to reverse an iv_hex:cipher_hex value."},
+            {
+                "name": "key_text",
+                "desc": "Key text (fit to the required size — teaching only; real keys must be securely random).",
+            },
+            {
+                "name": "key_size",
+                "desc": "Key length in bits: 128 (10 rounds), 192 (12) or 256 (14).",
+            },
+            {
+                "name": "mode",
+                "desc": "encrypt to encipher or decrypt to reverse an iv_hex:cipher_hex value.",
+            },
         ],
     },
     "security": {
@@ -76,8 +92,18 @@ DETAILS = {
         "en": "Practically secure with a sound key, but misuse destroys it: weak keys, reused IVs, ECB mode leaking patterns, or missing authentication (prefer authenticated modes like GCM). Side channels threaten implementations, not the cipher.",
     },
     "uses": {
-        "ar": ["اتصالات TLS/HTTPS", "تشفير الأقراص (BitLocker وFileVault)", "شبكات WPA2/WPA3 اللاسلكية", "تشفير النسخ الاحتياطية وقواعد البيانات"],
-        "en": ["TLS/HTTPS connections", "Full-disk encryption (BitLocker, FileVault)", "WPA2/WPA3 wireless", "Backup and database encryption"],
+        "ar": [
+            "اتصالات TLS/HTTPS",
+            "تشفير الأقراص (BitLocker وFileVault)",
+            "شبكات WPA2/WPA3 اللاسلكية",
+            "تشفير النسخ الاحتياطية وقواعد البيانات",
+        ],
+        "en": [
+            "TLS/HTTPS connections",
+            "Full-disk encryption (BitLocker, FileVault)",
+            "WPA2/WPA3 wireless",
+            "Backup and database encryption",
+        ],
     },
 }
 
@@ -149,7 +175,7 @@ def _xor(a: bytes, b: bytes) -> bytes:
     Returns:
         ``bytes(x ^ y for each pair)``.
     """
-    return bytes(x ^ y for x, y in zip(a, b))
+    return bytes(x ^ y for x, y in zip(a, b, strict=True))
 
 
 def simulate(text: str, key: str = "secret", mode: str = "encrypt", extra=None):
@@ -200,7 +226,9 @@ def simulate(text: str, key: str = "secret", mode: str = "encrypt", extra=None):
             iv_hex, ct_hex = (text or "").split(":", 1)
             iv, ct = bytes.fromhex(iv_hex.strip()), bytes.fromhex(ct_hex.strip())
         except Exception:
-            raise ValueError("decrypt expects 'iv_hex:cipher_hex' (copy the encrypt result)")
+            raise ValueError(
+                "decrypt expects 'iv_hex:cipher_hex' (copy the encrypt result)"
+            ) from None
         if len(ct) % 16 or not ct:
             raise ValueError("invalid ciphertext length")
         ecb = AES.new(key, AES.MODE_ECB)
@@ -209,17 +237,23 @@ def simulate(text: str, key: str = "secret", mode: str = "encrypt", extra=None):
                 "index": 0,
                 "title": {"ar": "الإعداد وفك السلسلة", "en": "Setup & unchain"},
                 "description": {
-                    "ar": f"AES-{key_size} ({rounds} جولة) — وضع CBC، طول المدخل {len(ct)} بايت = {len(ct)//16} كتلة",
-                    "en": f"AES-{key_size} ({rounds} rounds) — CBC mode, {len(ct)} bytes = {len(ct)//16} blocks",
+                    "ar": f"AES-{key_size} ({rounds} جولة) — وضع CBC، طول المدخل {len(ct)} بايت = {len(ct) // 16} كتلة",
+                    "en": f"AES-{key_size} ({rounds} rounds) — CBC mode, {len(ct)} bytes = {len(ct) // 16} blocks",
                 },
-                "snapshot": {"key_size": key_size, "rounds": rounds, "mode": "CBC", "iv": iv.hex(), "blocks": len(ct) // 16},
+                "snapshot": {
+                    "key_size": key_size,
+                    "rounds": rounds,
+                    "mode": "CBC",
+                    "iv": iv.hex(),
+                    "blocks": len(ct) // 16,
+                },
                 "highlight": [],
                 "meta": {"phase": "setup"},
             }
         )
         prev, out = iv, b""
         for b in range(len(ct) // 16):
-            block = ct[b * 16:(b + 1) * 16]
+            block = ct[b * 16 : (b + 1) * 16]
             dec = ecb.decrypt(block)
             plain = _xor(dec, prev)
             out += plain
@@ -240,7 +274,7 @@ def simulate(text: str, key: str = "secret", mode: str = "encrypt", extra=None):
         try:
             result = _unpad(out).decode("utf-8")
         except Exception:
-            raise ValueError("decryption failed — wrong key or corrupted data")
+            raise ValueError("decryption failed — wrong key or corrupted data") from None
         steps.append(
             {
                 "index": len(steps),
@@ -266,14 +300,20 @@ def simulate(text: str, key: str = "secret", mode: str = "encrypt", extra=None):
                 "ar": f"AES-{key_size} ({rounds} جولة) — {len(data)} بايت أصبحت {len(padded)} بعد حشو PKCS#7 = {n} كتلة، IV عشوائي",
                 "en": f"AES-{key_size} ({rounds} rounds) — {len(data)} bytes padded (PKCS#7) to {len(padded)} = {n} blocks, random IV",
             },
-            "snapshot": {"key_size": key_size, "rounds": rounds, "mode": "CBC", "iv": iv.hex(), "blocks": n},
+            "snapshot": {
+                "key_size": key_size,
+                "rounds": rounds,
+                "mode": "CBC",
+                "iv": iv.hex(),
+                "blocks": n,
+            },
             "highlight": [],
             "meta": {"phase": "setup"},
         }
     )
     prev, ct = iv, b""
     for b in range(n):
-        block = padded[b * 16:(b + 1) * 16]
+        block = padded[b * 16 : (b + 1) * 16]
         xored = _xor(block, prev)
         enc = ecb.encrypt(xored)
         ct += enc
@@ -286,7 +326,12 @@ def simulate(text: str, key: str = "secret", mode: str = "encrypt", extra=None):
                     "ar": f"XOR مع السابقة ثم تشفير الكتلة ({rounds} جولة) → {enc.hex()[:32]}…",
                     "en": f"XOR with previous then block encrypt ({rounds} rounds) → {enc.hex()[:32]}…",
                 },
-                "snapshot": {"block": b + 1, "plain": block.hex(), "xored": xored.hex(), "cipher": enc.hex()},
+                "snapshot": {
+                    "block": b + 1,
+                    "plain": block.hex(),
+                    "xored": xored.hex(),
+                    "cipher": enc.hex(),
+                },
                 "highlight": [b],
                 "meta": {"phase": "encrypt", "block": b},
             }
@@ -319,12 +364,24 @@ def analyze(extra=None):
     key_size = int((extra or {}).get("key_size", 128))
     return {
         "strengths": {
-            "ar": [f"AES-{key_size} معيار عالمي ولا يُكسر عملياً بمفتاح سليم", "وضع CBC يخفي تكرار الكتل"],
-            "en": [f"AES-{key_size} is a global standard, infeasible to break with a sound key", "CBC hides block repetition"],
+            "ar": [
+                f"AES-{key_size} معيار عالمي ولا يُكسر عملياً بمفتاح سليم",
+                "وضع CBC يخفي تكرار الكتل",
+            ],
+            "en": [
+                f"AES-{key_size} is a global standard, infeasible to break with a sound key",
+                "CBC hides block repetition",
+            ],
         },
         "weaknesses": {
-            "ar": ["أي ضعف في توليد المفتاح أو الـ IV ينسف الأمان", "نسخة العرض تبسّط اشتقاق المفتاح — لا تستخدمها حقيقة"],
-            "en": ["Weak key/IV generation destroys security", "This demo simplifies key handling — never use as-is"],
+            "ar": [
+                "أي ضعف في توليد المفتاح أو الـ IV ينسف الأمان",
+                "نسخة العرض تبسّط اشتقاق المفتاح — لا تستخدمها حقيقة",
+            ],
+            "en": [
+                "Weak key/IV generation destroys security",
+                "This demo simplifies key handling — never use as-is",
+            ],
         },
         "metrics": {"key_bits": key_size, "rounds": ROUNDS.get(key_size // 8, 10), "mode": "CBC"},
         "complexity": COMPLEXITY,

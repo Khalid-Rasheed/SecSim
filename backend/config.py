@@ -28,8 +28,10 @@ Example:
         $env:DATABASE_URL = "postgresql://user:pw@localhost/secsim"
         py run.py
 """
+
 import os
 from datetime import timedelta
+
 from dotenv import load_dotenv
 
 # Load ``backend/.env`` into the process environment before reading below.

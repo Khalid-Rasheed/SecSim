@@ -8,8 +8,10 @@ Routes:
     GET /api/history/<id>: Fetch one run with its full step trace
         (JWT required, owner-only).
 """
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request, jwt_required
+
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
+
 from app import db
 from app.models.simulation import Simulation
 from app.services.simulator import run_simulation

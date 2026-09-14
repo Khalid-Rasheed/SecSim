@@ -12,13 +12,14 @@ unbound and initialised inside the factory, which keeps imports
 cycle-free: routes import ``db`` from this package, and this package
 imports routes only inside the factory function.
 """
+
 from flask import Flask, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 
 from config import Config
 
@@ -75,13 +76,12 @@ def create_app(config_class=Config):
 
     # Imported here (not at top level) to avoid circular imports:
     # models need `db`, which only exists after the lines above.
-    from app.models.user import User  # noqa: F401
     from app.models.simulation import Simulation  # noqa: F401
-
-    from app.routes.auth import auth_bp
+    from app.models.user import User  # noqa: F401
     from app.routes.algorithms import algorithms_bp
-    from app.routes.simulation import simulation_bp
     from app.routes.analysis import analysis_bp
+    from app.routes.auth import auth_bp
+    from app.routes.simulation import simulation_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(algorithms_bp, url_prefix="/api")

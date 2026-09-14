@@ -10,6 +10,7 @@ Notes:
       this file to serve production traffic (use gunicorn/waitress).
     - The frontend dev server (``npm run dev``) proxies ``/api`` here.
 """
+
 from app import create_app
 
 # Single shared app instance used by the dev server and `flask` CLI.

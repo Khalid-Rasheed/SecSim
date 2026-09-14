@@ -4,8 +4,11 @@ Passwords are never stored — only a Werkzeug salted hash
 (see :meth:`User.set_password`). The public shape is defined by
 :meth:`User.to_dict`, which is what the auth endpoints return.
 """
-from datetime import datetime, timezone
-from werkzeug.security import generate_password_hash, check_password_hash
+
+from datetime import UTC, datetime
+
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from app import db
 
 
@@ -27,7 +30,7 @@ class User(db.Model):
     name = db.Column(db.String(120), nullable=True)
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
 
     # One user → many saved simulations (Simulation.user_id FK).
     simulations = db.relationship("Simulation", backref="user", lazy=True)

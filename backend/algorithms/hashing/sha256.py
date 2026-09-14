@@ -9,6 +9,7 @@ Contract: exposes ``COMPLEXITY`` / ``DETAILS`` / ``simulate()`` /
 ``analyze()`` and self-registers as ``"sha256"`` at the bottom of this
 file (see :mod:`app.services.registry`).
 """
+
 import hashlib
 
 from app.services.registry import register
@@ -55,8 +56,18 @@ DETAILS = {
         "en": "Strong preimage and collision resistance to date, but: never store passwords with it directly (it's fast, so guessable — use bcrypt/Argon2 with salt), and mind length-extension in protocol design (use HMAC).",
     },
     "uses": {
-        "ar": ["سلاسل الكتل (بتكوين)", "سلامة الملفات والتحميلات", "نظام git لتحديد الكائنات", "الرموز والتواقيع عبر HMAC"],
-        "en": ["Blockchains (Bitcoin)", "File and download integrity", "Git object addressing", "Tokens and signatures via HMAC"],
+        "ar": [
+            "سلاسل الكتل (بتكوين)",
+            "سلامة الملفات والتحميلات",
+            "نظام git لتحديد الكائنات",
+            "الرموز والتواقيع عبر HMAC",
+        ],
+        "en": [
+            "Blockchains (Bitcoin)",
+            "File and download integrity",
+            "Git object addressing",
+            "Tokens and signatures via HMAC",
+        ],
     },
 }
 

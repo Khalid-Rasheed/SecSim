@@ -63,8 +63,16 @@ DETAILS = {
         "en": "Completely insecure: only 25 keys to try in a fraction of a second, and letter-frequency analysis breaks it without even trying all keys. Never use it for anything real.",
     },
     "uses": {
-        "ar": ["تعليم مبادئ التشفير", "الألغاز (مثل ROT13 بإزاحة 13)", "مدخل لفهم تحليل التكرار وهجمات القوة الغاشمة"],
-        "en": ["Teaching cipher fundamentals", "Puzzles (e.g. ROT13 with shift 13)", "Gateway to frequency analysis and brute-force attacks"],
+        "ar": [
+            "تعليم مبادئ التشفير",
+            "الألغاز (مثل ROT13 بإزاحة 13)",
+            "مدخل لفهم تحليل التكرار وهجمات القوة الغاشمة",
+        ],
+        "en": [
+            "Teaching cipher fundamentals",
+            "Puzzles (e.g. ROT13 with shift 13)",
+            "Gateway to frequency analysis and brute-force attacks",
+        ],
     },
 }
 

@@ -51,10 +51,14 @@
         <i class="fa-solid fa-chart-line text-cipher me-1.5"></i>{{ $t('sim.complexity') }}
       </p>
       <div class="flex gap-2 flex-wrap mb-2" dir="ltr">
-        <span class="font-mono text-xs px-3 py-1.5 rounded-lg bg-cipher/10 border border-cipher/30 text-cipher">
+        <span
+          class="font-mono text-xs px-3 py-1.5 rounded-lg bg-cipher/10 border border-cipher/30 text-cipher"
+        >
           Time {{ complexity.time }}
         </span>
-        <span class="font-mono text-xs px-3 py-1.5 rounded-lg bg-keyamber/10 border border-keyamber/30 text-keyamber">
+        <span
+          class="font-mono text-xs px-3 py-1.5 rounded-lg bg-keyamber/10 border border-keyamber/30 text-keyamber"
+        >
           Space {{ complexity.space }}
         </span>
       </div>
@@ -80,8 +84,12 @@ const store = useSimulationStore()
 const chartEl = ref(null)
 let chart = null
 
-const strengths = computed(() => store.analysis?.strengths?.[locale.value] || store.analysis?.strengths?.en || [])
-const weaknesses = computed(() => store.analysis?.weaknesses?.[locale.value] || store.analysis?.weaknesses?.en || [])
+const strengths = computed(
+  () => store.analysis?.strengths?.[locale.value] || store.analysis?.strengths?.en || []
+)
+const weaknesses = computed(
+  () => store.analysis?.weaknesses?.[locale.value] || store.analysis?.weaknesses?.en || []
+)
 const complexity = computed(() => store.analysis?.complexity || null)
 
 function draw() {
@@ -91,14 +99,16 @@ function draw() {
     type: 'bar',
     data: {
       labels: [store.algorithm],
-      datasets: [{
-        label: 'ms',
-        data: [store.metrics.time_ms],
-        backgroundColor: 'rgba(13, 148, 136, 0.75)',
-        borderColor: '#0d9488',
-        borderWidth: 1,
-        borderRadius: 6
-      }]
+      datasets: [
+        {
+          label: 'ms',
+          data: [store.metrics.time_ms],
+          backgroundColor: 'rgba(13, 148, 136, 0.75)',
+          borderColor: '#0d9488',
+          borderWidth: 1,
+          borderRadius: 6
+        }
+      ]
     },
     options: {
       responsive: true,

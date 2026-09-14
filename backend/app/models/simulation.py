@@ -4,7 +4,9 @@ Every simulation — anonymous or authenticated — is stored, so the lab
 keeps a full audit trail. Rows with ``user_id = NULL`` are anonymous;
 ``GET /api/history`` only ever returns the caller's own rows.
 """
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
+
 from app import db
 
 
@@ -36,7 +38,7 @@ class Simulation(db.Model):
     result = db.Column(db.Text, nullable=True)
     steps = db.Column(db.JSON, nullable=True)
     duration_ms = db.Column(db.Float, nullable=True)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
 
     def to_dict(self, include_steps=False):
         """Serialize the record for history endpoints.

@@ -22,13 +22,22 @@
       <div class="panel p-5">
         <div class="flex items-center justify-between mb-4">
           <span class="font-mono text-xs text-muted" dir="ltr">
-            <span class="inline-block w-2 h-2 rounded-full bg-cipher animate-pulse me-2"></span>{{ $t('hero.live') }}
+            <span class="inline-block w-2 h-2 rounded-full bg-cipher animate-pulse me-2"></span
+            >{{ $t('hero.live') }}
           </span>
-          <span class="font-mono text-xs text-keyamber border border-keyamber/40 rounded px-2 py-0.5" dir="ltr">key = 3</span>
+          <span
+            class="font-mono text-xs text-keyamber border border-keyamber/40 rounded px-2 py-0.5"
+            dir="ltr"
+            >key = 3</span
+          >
         </div>
-        <p class="text-xs text-muted mb-2">{{ $t('hero.plain') }} <span class="font-mono" dir="ltr">HELLO</span></p>
+        <p class="text-xs text-muted mb-2">
+          {{ $t('hero.plain') }} <span class="font-mono" dir="ltr">HELLO</span>
+        </p>
         <CipherTape :chars="tape" :lit-up-to="lit" />
-        <p class="text-xs text-muted mt-3 mb-2">{{ $t('hero.ciphered') }} <span class="font-mono text-cipher" dir="ltr">KHOOR</span></p>
+        <p class="text-xs text-muted mt-3 mb-2">
+          {{ $t('hero.ciphered') }} <span class="font-mono text-cipher" dir="ltr">KHOOR</span>
+        </p>
         <div class="hairline-t pt-3 mt-1 font-mono text-[0.7rem] text-muted" dir="ltr">
           H(07) +3 → K(10) · E(04) +3 → H(07) · L(11) +3 → O(14) · O(14) +3 → R(17)
         </div>
@@ -40,7 +49,9 @@
       <p class="eyebrow mb-6">{{ $t('features.eyebrow') }}</p>
       <div class="grid md:grid-cols-3 gap-4">
         <div v-for="(f, i) in $tm('features.items')" :key="i" class="panel p-5">
-          <span class="w-10 h-10 rounded-lg bg-cipher/10 border border-cipher/30 flex items-center justify-center mb-4">
+          <span
+            class="w-10 h-10 rounded-lg bg-cipher/10 border border-cipher/30 flex items-center justify-center mb-4"
+          >
             <i :class="[$rt(f.icon), 'text-cipher']"></i>
           </span>
           <h3 class="font-semibold mb-1.5">{{ $rt(f.title) }}</h3>
@@ -59,7 +70,9 @@
       </div>
       <div class="grid sm:grid-cols-2 gap-4">
         <div v-for="a in sim.algorithms" :key="a.id" class="panel-flat p-5 flex gap-4 items-start">
-          <span class="w-10 h-10 rounded-lg bg-keyamber/10 border border-keyamber/30 flex items-center justify-center shrink-0">
+          <span
+            class="w-10 h-10 rounded-lg bg-keyamber/10 border border-keyamber/30 flex items-center justify-center shrink-0"
+          >
             <i :class="[algoIcon(a.type), 'text-keyamber']"></i>
           </span>
           <div class="flex-1">
@@ -67,11 +80,18 @@
             <p class="text-xs font-mono text-muted mb-1.5" dir="ltr">{{ a.type }}</p>
             <p class="text-sm text-muted mb-2">{{ a.description?.[locale] || a.description?.en }}</p>
             <div v-if="a.complexity" class="flex gap-1.5 flex-wrap mb-2" dir="ltr">
-              <span class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-cipher/10 border border-cipher/30 text-cipher">T: {{ a.complexity.time }}</span>
-              <span class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-keyamber/10 border border-keyamber/30 text-keyamber">S: {{ a.complexity.space }}</span>
+              <span
+                class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-cipher/10 border border-cipher/30 text-cipher"
+                >T: {{ a.complexity.time }}</span
+              >
+              <span
+                class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-keyamber/10 border border-keyamber/30 text-keyamber"
+                >S: {{ a.complexity.space }}</span
+              >
             </div>
             <router-link :to="'/algorithms/' + a.id" class="text-xs text-cipher hover:underline">
-              {{ $t('alg.learn_more') }} <i class="fa-solid fa-arrow-left text-[0.6rem] ms-1 rtl:rotate-180"></i>
+              {{ $t('alg.learn_more') }}
+              <i class="fa-solid fa-arrow-left text-[0.6rem] ms-1 rtl:rotate-180"></i>
             </router-link>
           </div>
         </div>

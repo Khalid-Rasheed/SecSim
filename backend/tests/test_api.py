@@ -4,7 +4,9 @@ Covers health, the Caesar/hash happy paths, and the auth → simulate →
 history chain (including that history requires a JWT). Uses an isolated
 in-memory SQLite DB per test via TestConfig.
 """
+
 import pytest
+
 from app import create_app, db
 from config import Config
 
@@ -60,6 +62,7 @@ def test_brute_force_non_english_no_crash(client):
 
 def test_brute_force_input_warnings(client):
     """Verdict step carries a bilingual warning for dubious input, else none."""
+
     def warning_for(text):
         r = client.post("/api/simulate", json={"algorithm": "brute_force", "input": text})
         assert r.status_code == 200
@@ -101,9 +104,7 @@ def test_auth_and_history(client):
 def test_register_rejects_bad_email(client):
     """Malformed emails never reach the database (400, no user created)."""
     for bad in ("not-an-email", "a@b", "a b@c.com", "@c.com", "a@.com"):
-        r = client.post(
-            "/api/auth/register", json={"email": bad, "password": "secret123"}
-        )
+        r = client.post("/api/auth/register", json={"email": bad, "password": "secret123"})
         assert r.status_code == 400, bad
         assert r.json["error"] == "invalid email address"
 
@@ -128,8 +129,6 @@ def test_login_rate_limited(client):
     client.post("/api/auth/register", json={"email": "r@r.com", "password": "secret123"})
     last = None
     for _ in range(11):
-        last = client.post(
-            "/api/auth/login", json={"email": "r@r.com", "password": "secret123"}
-        )
+        last = client.post("/api/auth/login", json={"email": "r@r.com", "password": "secret123"})
     assert last.status_code == 429
     assert last.json == {"error": "rate limit exceeded, try again later"}

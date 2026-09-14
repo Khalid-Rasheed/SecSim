@@ -34,11 +34,10 @@ Taxonomy (drives the frontend dropdown and simulator grouping):
     - type="hashing" → family "hashing", kind None (listed flat).
     - type="attack" → family "attack", kind None (listed flat).
 """
+
 import importlib
 import pkgutil
 import sys
-
-import algorithms
 
 # id -> registry entry (see module docstring for the entry shape).
 REGISTRY = {}
@@ -48,8 +47,9 @@ REGISTRY = {}
 _REQUIRED_ATTRS = ("simulate", "analyze", "COMPLEXITY", "DETAILS")
 
 
-def algorithm(id, *, type, name, description, params, keyspace=None, order=100,
-              family=None, kind=None):
+def algorithm(
+    id, *, type, name, description, params, keyspace=None, order=100, family=None, kind=None
+):
     """Attach metadata to an already-imported module object; validate.
 
     This is the decorator form of registration; prefer

@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
 """Input-matrix tests: Arabic, English, symbols, emoji, empty and long inputs."""
+
 import pytest
+
 from app import create_app, db
 from config import Config
 

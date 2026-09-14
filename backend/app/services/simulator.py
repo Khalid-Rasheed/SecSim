@@ -19,6 +19,7 @@ Every simulation returns the same tuple::
 - ``analysis``: static security review ``{strengths, weaknesses,
   metrics, complexity}``.
 """
+
 import time
 
 from app.services.registry import discover, lookup, ordered
@@ -78,7 +79,9 @@ def analyze_algorithm(algorithm: str, extra: dict | None = None):
     return entry["analyze"](extra or {})
 
 
-def run_simulation(algorithm: str, text: str, key=3, mode: str = "encrypt", extra: dict | None = None):
+def run_simulation(
+    algorithm: str, text: str, key=3, mode: str = "encrypt", extra: dict | None = None
+):
     """Execute a full simulation: run, time, and analyse.
 
     Args:
