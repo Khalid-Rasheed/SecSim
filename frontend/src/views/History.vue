@@ -1,3 +1,8 @@
+<!--
+  History — سجل المحاكيات المحفوظة للمستخدم (JWT).
+  Three states: locked (guest → login CTA), empty (CTA to simulator),
+  list (latest 50 runs with algorithm, I/O, duration and step count).
+-->
 <template>
   <div class="max-w-4xl mx-auto px-4 py-10">
     <p class="eyebrow mb-2"><i class="fa-solid fa-clock-rotate-left me-2"></i>{{ $t('history.title') }}</p>

@@ -1,3 +1,9 @@
+<!--
+  SecurityMetrics — لوحة التحليل الأمني لنتيجة المحاكاة.
+  Renders four layers from the simulation store: measured metrics
+  (wall-clock ms + step count), theoretical complexity badges (Big-O),
+  strengths/weaknesses lists, and a Chart.js bar of execution time.
+-->
 <template>
   <div v-if="store.analysis" class="panel p-5">
     <h3 class="font-semibold text-sm mb-4">

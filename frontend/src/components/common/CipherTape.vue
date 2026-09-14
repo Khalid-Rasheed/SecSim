@@ -1,3 +1,9 @@
+<!--
+  CipherTape — "شريط التشفير": the project's signature element.
+  A row of mono cells mapping each input char to its output char.
+  `litUpTo` progressively lights cells (hero animation, step highlight);
+  -1 = none lit, a large number = all lit.
+-->
 <template>
   <div class="flex gap-1.5 flex-wrap" dir="ltr">
     <div

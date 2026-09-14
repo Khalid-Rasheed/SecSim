@@ -1,3 +1,17 @@
+/**
+ * Simulation store — مخزن المحاكاة (Pinia), the heart of the frontend.
+ *
+ * Responsibilities:
+ *   1. Catalogue — `algorithms` list + cached per-algorithm `details`
+ *      (reference guides) fetched lazily by the Simulator brief card.
+ *   2. Lab inputs — one field group per algorithm family (caesar key,
+ *      AES key text/size, RSA p/q/e); run() maps them to the backend's
+ *      flat payload (key / key_text / key_size / rsa_p / rsa_q / rsa_e).
+ *   3. Step player — currentStep + play/stop timer consumed by
+ *      VisualizationArea (transport + step dots + progress rail).
+ *   4. Results — result/metrics/analysis/warning straight from
+ *      POST /api/simulate, plus the JWT-protected `history`.
+ */
 import { defineStore } from 'pinia'
 import api from '../services/api'
 
@@ -40,6 +54,9 @@ export const useSimulationStore = defineStore('simulation', {
       this.algorithms = data
     },
     async fetchDetails(id) {
+      // Lazily loads + caches GET /api/algorithms/:id (full reference
+      // guide). Cached per id so switching algorithms back and forth
+      // never refetches.
       const algoId = id || this.algorithm
       if (this.details[algoId]) return this.details[algoId]
       this.detailsLoading = true
@@ -54,6 +71,8 @@ export const useSimulationStore = defineStore('simulation', {
       }
     },
     fillExample() {
+      // One-click demo inputs per algorithm (also used as sane defaults
+      // for the auto-run when the user switches algorithms).
       this.mode = 'encrypt'
       if (this.algorithm === 'caesar') {
         this.input = 'Hello World'

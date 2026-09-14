@@ -1,3 +1,7 @@
+<!--
+  Profile — بطاقة الحساب: name/email/join-date from the auth store
+  plus a shortcut to History. Guests see a login prompt instead.
+-->
 <template>
   <div class="max-w-md mx-auto px-4 py-14">
     <p class="eyebrow mb-2"><i class="fa-solid fa-user me-2"></i>{{ $t('nav.profile') }}</p>

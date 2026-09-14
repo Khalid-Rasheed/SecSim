@@ -1,3 +1,9 @@
+"""Core API tests — اختبارات الواجهات الأساسية.
+
+Covers health, the Caesar/HASH happy paths, and the auth → simulate →
+history chain (including that history requires a JWT). Uses an isolated
+in-memory SQLite DB per test via TestConfig.
+"""
 import pytest
 from app import create_app, db
 from config import Config

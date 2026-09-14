@@ -1,3 +1,11 @@
+/**
+ * Auth store — مخزن المصادقة (Pinia).
+ *
+ * Holds the JWT + user profile and mirrors them to localStorage so the
+ * session survives reloads. The api service reads 'secsim_token' on every
+ * request; logout() clears both copies. `isLoggedIn` gates /history and
+ * the History/Profile views.
+ */
 import { defineStore } from 'pinia'
 import api from '../services/api'
 
