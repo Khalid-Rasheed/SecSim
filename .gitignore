@@ -5,3 +5,7 @@ venv/
 *.db
 node_modules/
 dist/
+.coverage
+htmlcov/
+.pytest_cache/
+coverage.xml
