@@ -1,0 +1,6 @@
+# Backend + frontend reviewers for algorithm work.
+backend/algorithms/ @Khalid-Rasheed
+backend/app/services/ @Khalid-Rasheed
+# Frontend lab UI reviewers.
+frontend/src/views/Simulator.vue @Khalid-Rasheed
+frontend/src/stores/ @Khalid-Rasheed

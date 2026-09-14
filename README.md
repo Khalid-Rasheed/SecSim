@@ -1,9 +1,33 @@
 # SecSim — Interactive Security Algorithms Simulator
 
+![CI](https://github.com/Khalid-Rasheed/SecSim/actions/workflows/ci.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg)
+![Node](https://img.shields.io/badge/Node-20%2B-green.svg)
+
 > **Learn security by breaking it open.** SecSim is a bilingual (Arabic/English)
 > web lab where you can *run* security algorithms step by step, *read* a full
 > reference guide for each one, and *analyze* their strengths, weaknesses and
 > complexity — all in one place.
+
+## Contents
+
+- [The idea](#the-idea)
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [Project structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Run (Windows)](#run-windows)
+- [Run tests](#run-tests)
+- [Docker (full stack)](#docker-full-stack)
+- [API reference](#api-reference)
+- [Supported inputs](#supported-inputs)
+- [Algorithm complexity](#algorithm-complexity)
+- [Adding an algorithm](#adding-an-algorithm-single-file-zero-edits-elsewhere)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [Roadmap](#roadmap)
+- [License](#license)
 
 ## The idea
 
@@ -70,6 +94,15 @@ frontend/
     router/  services/api.js (JWT interceptor)  i18n/ (ar.json, en.json)
 docs/api.md            # full endpoint reference
 ```
+
+## Prerequisites
+
+| Tool | Minimum version | Notes |
+|---|---|---|
+| Python | 3.12+ | On Windows use the `py` launcher (`py -m pip`, `py run.py`) — plain `python` may not be on PATH |
+| Node.js | 20+ | Ships with npm; frontend uses Vite 6 |
+| Docker (optional) | 24+ | Only needed for the compose stack |
+| Git | any | Clone + contribution workflow |
 
 ## Run (Windows)
 
@@ -164,6 +197,25 @@ larger scripts need bigger `p`/`q`, which the UI lets you set.
    - one `register("<id>", type=..., name={...}, description={...}, params=[...], keyspace=..., order=N)` call at the end
 2. It is auto-discovered on next reload: list, detail page, simulate, analyze, history all work.
 3. Frontend: only add input widgets if it has params (`simulationStore.js` + conditional panel in `Simulator.vue`); guide page, badges and icons render automatically. Guarded by `tests/test_registry.py`.
+
+## Troubleshooting
+
+| Symptom | Cause / fix |
+|---|---|
+| `python` / `pip` not recognized (Windows) | Use the `py` launcher: `py -m pip …`, `py run.py` |
+| Port `5173` busy | Another Vite app is holding it — stop it, then `npm run dev` |
+| Port `5000` busy | Stop the old Flask process, then `py run.py` |
+| `401` after login, redirect to login | JWT expired (12h default) — log in again; check system clock skew |
+| `429 rate limit exceeded` | Too many auth attempts — wait a minute (limits documented above) |
+| Arabic shows as boxes | Missing Arabic font in the OS/browser — install any Arabic-capable font |
+| `GET /history` → `401` | No/expired `Authorization: Bearer <token>` header — log in first |
+
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md)
+first (setup, branch naming, PR checklist), open algorithm ideas as an
+[algorithm proposal](.github/ISSUE_TEMPLATE/algorithm_proposal.md), and
+report vulnerabilities privately per [SECURITY.md](SECURITY.md).
 
 ## Roadmap
 - Dictionary attack, MITM demo, algorithm comparison view, export PDF/CSV
