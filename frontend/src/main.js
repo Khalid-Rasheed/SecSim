@@ -1,7 +1,7 @@
 /**
- * SecSim entry point — نقطة دخول التطبيق.
+ * SecSim entry point.
  *
- * Boot order (مهم): Pinia → Router → i18n → mount, so every view can
+ * Boot order (important): Pinia → Router → i18n → mount, so every view can
  * rely on stores, routes and translations from its first render.
  * The saved language is applied to <html> here (lang + dir) before
  * any component mounts, preventing an RTL/LTR flash on reload.

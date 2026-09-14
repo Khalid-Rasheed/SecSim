@@ -1,5 +1,5 @@
 /**
- * Simulation store — مخزن المحاكاة (Pinia), the heart of the frontend.
+ * Simulation store (Pinia), the heart of the frontend.
  *
  * Responsibilities:
  *   1. Catalogue — `algorithms` list + cached per-algorithm `details`

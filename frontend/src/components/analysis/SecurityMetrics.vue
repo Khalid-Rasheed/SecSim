@@ -1,5 +1,5 @@
 <!--
-  SecurityMetrics — لوحة التحليل الأمني لنتيجة المحاكاة.
+  SecurityMetrics — security analysis panel for a simulation result.
   Renders four layers from the simulation store: measured metrics
   (wall-clock ms + step count), theoretical complexity badges (Big-O),
   strengths/weaknesses lists, and a Chart.js bar of execution time.

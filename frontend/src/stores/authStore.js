@@ -1,5 +1,5 @@
 /**
- * Auth store — مخزن المصادقة (Pinia).
+ * Auth store (Pinia).
  *
  * Holds the JWT + user profile and mirrors them to localStorage so the
  * session survives reloads. The api service reads 'secsim_token' on every

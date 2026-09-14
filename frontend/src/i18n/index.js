@@ -1,5 +1,5 @@
 /**
- * Internationalization — إدارة اللغتين.
+ * Internationalization (vue-i18n, composition API).
  *
  * Arabic is the default locale (ar.json), English the fallback (en.json);
  * the choice persists in localStorage under 'secsim_lang'. Algorithm

@@ -1,5 +1,5 @@
 /**
- * Application routes — خريطة صفحات التطبيق.
+ * Application routes.
  *
  *   /                  Home (hero + live cipher-tape demo)
  *   /simulator         Simulation bench; accepts ?algo=<id> to preselect

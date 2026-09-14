@@ -1,5 +1,5 @@
 <!--
-  Profile — بطاقة الحساب: name/email/join-date from the auth store
+  Profile — account card: name/email/join-date from the auth store
   plus a shortcut to History. Guests see a login prompt instead.
 -->
 <template>

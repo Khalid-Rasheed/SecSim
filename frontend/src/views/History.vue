@@ -1,5 +1,5 @@
 <!--
-  History — سجل المحاكيات المحفوظة للمستخدم (JWT).
+  History — the user's saved simulation runs (JWT-protected).
   Three states: locked (guest → login CTA), empty (CTA to simulator),
   list (latest 50 runs with algorithm, I/O, duration and step count).
 -->

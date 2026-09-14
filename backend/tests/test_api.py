@@ -1,6 +1,6 @@
-"""Core API tests — اختبارات الواجهات الأساسية.
+"""Core API tests.
 
-Covers health, the Caesar/HASH happy paths, and the auth → simulate →
+Covers health, the Caesar/hash happy paths, and the auth → simulate →
 history chain (including that history requires a JWT). Uses an isolated
 in-memory SQLite DB per test via TestConfig.
 """
