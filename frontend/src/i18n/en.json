@@ -14,11 +14,19 @@
     "encryption": "Encryption",
     "symmetric": "Symmetric",
     "asymmetric": "Asymmetric",
+    "classical": "Classical",
     "stream": "Stream",
     "block": "Block",
     "factorization": "Factorization",
+    "discrete": "Discrete log",
+    "elliptic": "Elliptic curve",
     "hashing": "Hashing",
-    "attack": "Attacks"
+    "broken": "Broken",
+    "secure": "Secure",
+    "password": "Password hashing",
+    "attack": "Attacks",
+    "attack_lab": "Attack lab",
+    "tabs_title": "Browse by type"
   },
   "hero": {
     "eyebrow": "Security algorithms lab",
@@ -71,6 +79,10 @@
     "prime_q": "Prime q",
     "prime_e": "Public exponent e",
     "attack_hint": "Enter Caesar ciphertext (English) and the attack will try all 25 keys",
+    "breaker_hint": "Enter Vigenère ciphertext (long English, 40+ letters) to recover length and key",
+    "mitm_hint": "Enter Alice's message — Eve intercepts with her secrets and reads it while Bob fails",
+    "collision_hint": "Enter a base text and the attack finds a real truncated SHA-256 collision",
+    "dict_hint": "Enter an MD5 digest (or any text) and the 30-word list will be tried against it",
     "rsa_decrypt_hint": "To decrypt, paste the space-separated values produced by encryption",
     "rsa_hint": "Arabic, English and symbols work with default keys — emoji needs larger p and q",
     "mode": "Mode",
@@ -100,7 +112,29 @@
     "brief_loading": "Loading brief...",
     "example": "Fill example",
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied",
+    "vigenere_key": "Keyword",
+    "rc4_key": "RC4 key",
+    "playfair_key": "Square keyword",
+    "dh_p": "Modulus p",
+    "dh_g": "Generator g",
+    "dh_a": "Alice secret",
+    "dh_b": "Bob secret",
+    "mitm_e": "Eve secret toward Alice",
+    "mitm_f": "Eve secret toward Bob",
+    "collision_bits": "Truncation bits (8..24)",
+    "elgamal_p": "Modulus p",
+    "elgamal_g": "Generator g",
+    "elgamal_x": "Private x",
+    "elgamal_k": "Ephemeral k",
+    "elgamal_note": "Randomized encryption — same text gives a different pair each time; output is c1,c2 pairs",
+    "playfair_note": "Latin letters only — J merges into I, X splits and pads",
+    "pbkdf2_salt": "Salt (empty = random)",
+    "pbkdf2_iterations": "Iterations",
+    "dh_note": "Key exchange — no ciphertext here, output is the shared secret",
+    "tests": "Computed security tests",
+    "tests_loading": "Computing tests...",
+    "tests_hint": "Computed live on your current input — not fixed text"
   },
   "auth": {
     "login": "Login",
@@ -164,6 +198,19 @@
     "license": "MIT license — free for educational use",
     "made": "Crafted with passion for cybersecurity education"
   },
+  "compare": {
+    "title": "Side-by-side comparison",
+    "subtitle": "Same input, different algorithms — digests, avalanche, time and key facts",
+    "preset_hash": "MD5 vs SHA-256",
+    "preset_aes": "AES-128 vs AES-256",
+    "preset_sha_family": "SHA-256 vs SHA-512 vs SHA-3",
+    "loading": "Comparing...",
+    "digest": "Digest",
+    "avalanche": "Avalanche",
+    "keysize": "Key size",
+    "keyspace": "Keyspace",
+    "rounds": "Rounds"
+  },
   "alg": {
     "overview": "Overview",
     "history": "Story & history",
@@ -177,6 +224,10 @@
     "type_encryption": "Encryption",
     "type_hashing": "Hashing",
     "type_attack": "Attack",
-    "not_found": "Algorithm not found"
+    "not_found": "Algorithm not found",
+    "badge_secure": "Secure",
+    "badge_legacy": "Legacy",
+    "badge_broken": "Broken — teaching only",
+    "badge_educational": "Teaching model"
   }
 }

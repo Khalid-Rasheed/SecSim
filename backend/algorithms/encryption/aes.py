@@ -396,6 +396,7 @@ register(
     type="encryption",
     family="symmetric",
     kind="block",
+    security="secure",
     name={"ar": "AES", "en": "AES"},
     description={
         "ar": "معيار التشفير المتقدم — وضع CBC بخطوات كل كتلة",

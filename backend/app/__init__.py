@@ -13,13 +13,17 @@ cycle-free: routes import ``db`` from this package, and this package
 imports routes only inside the factory function.
 """
 
-from flask import Flask, jsonify
+from uuid import uuid4
+
+from flask import Flask, g, jsonify, request
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+
+import time
 
 from config import Config
 
@@ -81,12 +85,44 @@ def create_app(config_class=Config):
     from app.routes.algorithms import algorithms_bp
     from app.routes.analysis import analysis_bp
     from app.routes.auth import auth_bp
+    from app.routes.security import security_bp
     from app.routes.simulation import simulation_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(algorithms_bp, url_prefix="/api")
     app.register_blueprint(simulation_bp, url_prefix="/api")
     app.register_blueprint(analysis_bp, url_prefix="/api")
+    app.register_blueprint(security_bp, url_prefix="/api")
+    # Versioned canonical paths. /api stays as the legacy alias so existing
+    # clients (including the current frontend) keep working; new clients
+    # should use /api/v1. Distinct blueprint `name`s avoid endpoint clashes.
+    app.register_blueprint(auth_bp, url_prefix="/api/v1/auth", name="v1_auth")
+    app.register_blueprint(algorithms_bp, url_prefix="/api/v1", name="v1_algorithms")
+    app.register_blueprint(simulation_bp, url_prefix="/api/v1", name="v1_simulation")
+    app.register_blueprint(analysis_bp, url_prefix="/api/v1", name="v1_analysis")
+    app.register_blueprint(security_bp, url_prefix="/api/v1", name="v1_security")
+
+    # Request-id logging: every response carries X-Request-Id and one
+    # structured line (method, path, status, ms) goes to the app logger —
+    # the minimum observability a multi-process deployment needs.
+    @app.before_request
+    def _assign_request_id():
+        g.request_id = request.headers.get("X-Request-Id") or uuid4().hex[:12]
+        g.started_at = time.perf_counter()
+
+    @app.after_request
+    def _log_request(response):
+        elapsed_ms = (time.perf_counter() - g.get("started_at", time.perf_counter())) * 1000
+        response.headers["X-Request-Id"] = g.get("request_id", "-")
+        app.logger.info(
+            "%s %s %s %s %.1fms",
+            g.get("request_id", "-"),
+            request.method,
+            request.path,
+            response.status_code,
+            elapsed_ms,
+        )
+        return response
 
     @app.get("/api/health")
     def health():

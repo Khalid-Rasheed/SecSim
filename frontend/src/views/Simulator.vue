@@ -35,8 +35,26 @@
           <h2 class="text-sm font-semibold mb-3">
             <i class="fa-solid fa-microchip text-cipher me-2"></i>{{ $t('sim.choose') }}
           </h2>
-          <!-- Grouped picker: mirrors the navbar dropdown taxonomy
-               (encryption → family → kind; hashing/attacks flat). -->
+          <p class="text-[0.7rem] text-muted mb-2">{{ $t('tax.tabs_title') }}</p>
+          <!-- TOP TABS: symmetric | asymmetric | hashing (+ attack lab) -->
+          <div class="grid grid-cols-4 gap-1.5 mb-4" role="tablist">
+            <button
+              v-for="tab in tabs"
+              :key="tab.key"
+              role="tab"
+              :aria-selected="activeTab === tab.key"
+              :class="[
+                'py-2 px-1 rounded-xl text-[0.7rem] font-bold border transition',
+                activeTab === tab.key
+                  ? 'bg-cipher/10 border-cipher text-cipher'
+                  : 'bg-panel2 border-[rgba(148,163,184,0.16)] text-muted hover:border-muted'
+              ]"
+              @click="activeTab = tab.key"
+            >
+              <i :class="[tab.icon, 'mb-1 block']"></i>{{ tab.title }}
+            </button>
+          </div>
+          <!-- Groups inside the active tab: one section per kind -->
           <div class="space-y-4">
             <div v-for="grp in pickerGroups" :key="grp.key">
               <p class="text-[0.7rem] font-extrabold text-mist mb-1.5">
@@ -61,7 +79,17 @@
                     ]"
                   ></i>
                   <div class="font-display font-semibold text-sm" dir="ltr">{{ a.id }}</div>
-                  <div class="text-[0.7rem] text-muted font-mono" dir="ltr">{{ a.kind || a.type }}</div>
+                  <div class="flex gap-1 flex-wrap mt-1" dir="ltr">
+                    <span class="text-[0.65rem] text-muted font-mono">{{ a.kind || a.type }}</span>
+                    <span
+                      v-if="a.security"
+                      :class="[
+                        'font-mono text-[0.6rem] px-1.5 py-px rounded border',
+                        securityClass(a.security)
+                      ]"
+                      >{{ $t('alg.badge_' + a.security) }}</span
+                    >
+                  </div>
                 </button>
               </div>
             </div>
@@ -135,6 +163,18 @@
           <p v-if="store.algorithm === 'brute_force'" class="text-[0.7rem] text-keyamber mb-4">
             <i class="fa-solid fa-burst me-1"></i>{{ $t('sim.attack_hint') }}
           </p>
+          <p v-else-if="store.algorithm === 'vigenere_breaker'" class="text-[0.7rem] text-keyamber mb-4">
+            <i class="fa-solid fa-burst me-1"></i>{{ $t('sim.breaker_hint') }}
+          </p>
+          <p v-else-if="store.algorithm === 'dh_mitm'" class="text-[0.7rem] text-keyamber mb-4">
+            <i class="fa-solid fa-burst me-1"></i>{{ $t('sim.mitm_hint') }}
+          </p>
+          <p v-else-if="store.algorithm === 'birthday_collision'" class="text-[0.7rem] text-keyamber mb-4">
+            <i class="fa-solid fa-burst me-1"></i>{{ $t('sim.collision_hint') }}
+          </p>
+          <p v-else-if="store.algorithm === 'dictionary_attack'" class="text-[0.7rem] text-keyamber mb-4">
+            <i class="fa-solid fa-burst me-1"></i>{{ $t('sim.dict_hint') }}
+          </p>
           <p
             v-else-if="store.algorithm === 'rsa' && store.mode === 'decrypt'"
             class="text-[0.7rem] text-keyamber mb-4"
@@ -143,6 +183,15 @@
           </p>
           <p v-else-if="store.algorithm === 'rsa'" class="text-[0.7rem] text-muted mb-4">
             <i class="fa-solid fa-circle-info me-1"></i>{{ $t('sim.rsa_hint') }}
+          </p>
+          <p v-else-if="store.algorithm === 'diffie_hellman'" class="text-[0.7rem] text-muted mb-4">
+            <i class="fa-solid fa-circle-info me-1"></i>{{ $t('sim.dh_note') }}
+          </p>
+          <p v-else-if="store.algorithm === 'elgamal'" class="text-[0.7rem] text-muted mb-4">
+            <i class="fa-solid fa-circle-info me-1"></i>{{ $t('sim.elgamal_note') }}
+          </p>
+          <p v-else-if="store.algorithm === 'playfair'" class="text-[0.7rem] text-muted mb-4">
+            <i class="fa-solid fa-circle-info me-1"></i>{{ $t('sim.playfair_note') }}
           </p>
           <div v-else class="mb-4"></div>
           <div v-if="store.algorithm === 'caesar'" class="mb-4">
@@ -156,7 +205,37 @@
               dir="ltr"
             />
           </div>
-          <div v-if="['caesar', 'aes', 'rsa'].includes(store.algorithm)" class="mb-4">
+          <div v-if="store.algorithm === 'vigenere'" class="mb-4">
+            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.vigenere_key') }}</label>
+            <input
+              v-model="store.vigenereKey"
+              class="field w-full px-3 py-2.5 text-sm font-mono"
+              dir="ltr"
+              placeholder="LEMON"
+            />
+          </div>
+          <div v-if="store.algorithm === 'playfair'" class="mb-4">
+            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.playfair_key') }}</label>
+            <input
+              v-model="store.playfairKey"
+              class="field w-full px-3 py-2.5 text-sm font-mono"
+              dir="ltr"
+              placeholder="MONARCHY"
+            />
+          </div>
+          <div v-if="store.algorithm === 'rc4'" class="mb-4">
+            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.rc4_key') }}</label>
+            <input
+              v-model="store.rc4Key"
+              class="field w-full px-3 py-2.5 text-sm font-mono"
+              dir="ltr"
+              placeholder="secret"
+            />
+          </div>
+          <div
+            v-if="['caesar', 'vigenere', 'playfair', 'rc4', 'aes', 'rsa', 'elgamal'].includes(store.algorithm)"
+            class="mb-4"
+          >
             <label class="block text-xs text-muted mb-1.5">{{ $t('sim.mode') }}</label>
             <select v-model="store.mode" class="field w-full px-3 py-2.5 text-sm">
               <option value="encrypt">{{ $t('sim.encrypt') }}</option>
@@ -214,6 +293,171 @@
               />
             </div>
           </div>
+          <div v-if="store.algorithm === 'diffie_hellman'" class="grid grid-cols-2 gap-3 mb-4">
+            <div>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">p</label>
+              <input
+                v-model.number="store.dhP"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">g</label>
+              <input
+                v-model.number="store.dhG"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.dh_a') }}</label>
+              <input
+                v-model.number="store.dhA"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.dh_b') }}</label>
+              <input
+                v-model.number="store.dhB"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+          </div>
+          <div v-if="store.algorithm === 'dh_mitm'" class="grid grid-cols-2 gap-3 mb-4">
+            <div>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">p</label>
+              <input
+                v-model.number="store.dhP"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">g</label>
+              <input
+                v-model.number="store.dhG"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.dh_a') }}</label>
+              <input
+                v-model.number="store.dhA"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.dh_b') }}</label>
+              <input
+                v-model.number="store.dhB"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.mitm_e') }}</label>
+              <input
+                v-model.number="store.mitmE"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.mitm_f') }}</label>
+              <input
+                v-model.number="store.mitmF"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+          </div>
+          <div v-if="store.algorithm === 'birthday_collision'" class="mb-4">
+            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.collision_bits') }}</label>
+            <input
+              v-model.number="store.collisionBits"
+              type="number"
+              min="8"
+              max="24"
+              class="field w-full px-3 py-2.5 text-sm font-mono"
+              dir="ltr"
+            />
+          </div>
+          <div v-if="store.algorithm === 'elgamal'" class="grid grid-cols-2 gap-3 mb-4">
+            <div>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">p</label>
+              <input
+                v-model.number="store.elgamalP"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">g</label>
+              <input
+                v-model.number="store.elgamalG"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.elgamal_x') }}</label>
+              <input
+                v-model.number="store.elgamalX"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.elgamal_k') }}</label>
+              <input
+                v-model.number="store.elgamalK"
+                type="number"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+          </div>
+          <div v-if="store.algorithm === 'pbkdf2'" class="grid grid-cols-2 gap-3 mb-4">
+            <div class="col-span-2">
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.pbkdf2_salt') }}</label>
+              <input
+                v-model="store.pbkdf2Salt"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+                placeholder="empty = random"
+              />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.pbkdf2_iterations') }}</label>
+              <input
+                v-model.number="store.pbkdf2Iterations"
+                type="number"
+                min="1"
+                max="2000000"
+                class="field w-full px-3 py-2.5 text-sm font-mono"
+                dir="ltr"
+              />
+            </div>
+          </div>
           <button
             :disabled="store.loading"
             class="btn-cipher w-full py-3 text-sm disabled:opacity-50"
@@ -261,6 +505,7 @@
 
         <VisualizationArea v-if="store.steps.length" />
         <SecurityMetrics v-if="store.analysis" />
+        <ComparePanel />
       </div>
     </div>
   </div>
@@ -273,6 +518,7 @@ import { useI18n } from 'vue-i18n'
 import { useSimulationStore } from '../stores/simulationStore'
 import VisualizationArea from '../components/simulation/VisualizationArea.vue'
 import SecurityMetrics from '../components/analysis/SecurityMetrics.vue'
+import ComparePanel from '../components/analysis/ComparePanel.vue'
 const store = useSimulationStore()
 const route = useRoute()
 const { t, locale } = useI18n()
@@ -282,48 +528,53 @@ function algoIcon(type) {
   if (type === 'hashing') return 'fa-solid fa-fingerprint'
   return 'fa-solid fa-key'
 }
+function securityClass(level) {
+  if (level === 'secure') return 'bg-cipher/10 border-cipher/30 text-cipher'
+  if (level === 'broken') return 'bg-dangerx/10 border-dangerx/30 text-dangerx'
+  if (level === 'legacy') return 'bg-keyamber/10 border-keyamber/30 text-keyamber'
+  return 'bg-panel2 border-[rgba(148,163,184,0.25)] text-muted'
+}
 // Breadcrumb for the masthead badge, e.g. "symmetric · stream".
 // Falls back to the flat type for entries without taxonomy.
 const taxBreadcrumb = computed(() => {
   const m = store.currentMeta
   if (!m) return '—'
-  if (m.type === 'encryption' && m.family) {
-    return m.kind ? `${m.family} · ${m.kind}` : m.family
-  }
-  return m.type
+  if (m.family && m.kind) return `${m.family} · ${m.kind}`
+  return m.family || m.type
 })
-// Grouped picker sections mirroring the navbar dropdown taxonomy:
-// one section per (family, kind) under encryption, flat sections for
-// hashing and attacks. Catalog order is preserved inside groups.
+// Top tabs: symmetric | asymmetric | hashing | attack lab.
+const activeTab = ref('symmetric')
+const tabs = computed(() => [
+  { key: 'symmetric', title: t('tax.symmetric'), icon: 'fa-solid fa-key text-cipher' },
+  { key: 'asymmetric', title: t('tax.asymmetric'), icon: 'fa-solid fa-key text-keyamber' },
+  { key: 'hashing', title: t('tax.hashing'), icon: 'fa-solid fa-fingerprint text-cipher' },
+  { key: 'attack', title: t('tax.attack_lab'), icon: 'fa-solid fa-burst text-dangerx' }
+])
+function tabForAlgorithm(id) {
+  const m = store.algorithms.find((a) => a.id === id)
+  if (!m) return 'symmetric'
+  if (m.type === 'attack') return 'attack'
+  if (m.family === 'asymmetric') return 'asymmetric'
+  if (m.family === 'hashing') return 'hashing'
+  return 'symmetric'
+}
+// Groups inside the active tab: one section per kind, preserving
+// catalog order. Falls back to the flat list when taxonomy is missing.
 const pickerGroups = computed(() => {
-  const groups = []
-  const enc = store.algorithms.filter((a) => a.type === 'encryption')
-  for (const family of ['symmetric', 'asymmetric']) {
-    const members = enc.filter((a) => a.family === family)
-    const kinds = []
-    for (const a of members) {
-      if (!kinds.includes(a.kind)) kinds.push(a.kind)
-    }
-    for (const kind of kinds) {
-      groups.push({
-        key: `${family}/${kind}`,
-        title: t('tax.' + family),
-        sub: kind ? t('tax.' + kind) : '',
-        items: members.filter((a) => a.kind === kind)
-      })
-    }
+  const inTab =
+    activeTab.value === 'attack'
+      ? store.algorithms.filter((a) => a.type === 'attack')
+      : store.algorithms.filter((a) => a.family === activeTab.value)
+  const kinds = []
+  for (const a of inTab) {
+    if (!kinds.includes(a.kind)) kinds.push(a.kind)
   }
-  const flat = (type) => ({
-    key: type,
-    title: t('tax.' + type),
-    sub: '',
-    items: store.algorithms.filter((a) => a.type === type)
-  })
-  // Only append non-empty sections (robust to catalog changes).
-  for (const sec of [flat('hashing'), flat('attack')]) {
-    if (sec.items.length) groups.push(sec)
-  }
-  return groups
+  return kinds.map((kind) => ({
+    key: `${activeTab.value}/${kind || 'all'}`,
+    title: t('tax.' + activeTab.value),
+    sub: kind ? t('tax.' + kind) : '',
+    items: inTab.filter((a) => a.kind === kind)
+  }))
 })
 const briefText = computed(() => {
   const d = store.currentDetail?.details?.overview
@@ -350,8 +601,9 @@ async function copyResult() {
 }
 watch(
   () => store.algorithm,
-  async () => {
+  async (id) => {
     copied.value = false
+    activeTab.value = tabForAlgorithm(id)
     await store.fetchDetails()
     if (store.input) await store.run()
   }
@@ -364,6 +616,7 @@ onMounted(async () => {
   }
   const preset = route.query.algo
   if (preset && store.algorithms.some((a) => a.id === preset)) store.algorithm = preset
+  activeTab.value = tabForAlgorithm(store.algorithm)
   await store.fetchDetails()
   if (store.input && !store.result) await store.run()
 })

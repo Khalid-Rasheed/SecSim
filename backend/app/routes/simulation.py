@@ -4,25 +4,24 @@ Routes:
     POST /api/simulate: Execute any registered algorithm on user input
         and persist the run (anonymously, or linked to the caller when
         a valid JWT is supplied).
-    GET /api/history: List the caller's own past runs (JWT required).
+    GET /api/history: List the caller's own past runs, paged (JWT required).
     GET /api/history/<id>: Fetch one run with its full step trace
         (JWT required, owner-only).
+
+Thin-route note: validation lives in :mod:`app.schemas`, persistence in
+:app:mod:`app.services.history_service`, execution in
+:mod:`app.services.simulator`; handlers below only map between HTTP
+and those layers.
 """
 
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 
-from app import db
-from app.models.simulation import Simulation
+from app.schemas import parse_pagination, parse_simulate
+from app.services.history_service import get_run, list_runs, save_run
 from app.services.simulator import run_simulation
 
 simulation_bp = Blueprint("simulation", __name__)
-
-# Optional algorithm-specific fields accepted from the client and
-# forwarded untouched into the dispatcher `extra` dict:
-#   - aes: key_text (str), key_size (128|192|256)
-#   - rsa: rsa_p, rsa_q, rsa_e (ints)
-EXTRA_KEYS = ("key_text", "key_size", "rsa_p", "rsa_q", "rsa_e")
 
 
 @simulation_bp.post("/simulate")
@@ -55,20 +54,13 @@ def simulate():
     """
     # `silent=True` turns malformed JSON into {} so we can answer
     # with our own 400 message instead of raising.
-    data = request.get_json(force=True, silent=True) or {}
-    algorithm = data.get("algorithm")
-    text = data.get("input", "")
-    key = data.get("key", 3)
-    mode = data.get("mode", "encrypt")
-    # Pick only known extra keys — anything else is ignored, never stored.
-    extra = {k: data[k] for k in EXTRA_KEYS if k in data}
-
-    if not algorithm:
-        return jsonify({"error": "algorithm is required"}), 400
-    if text is None or not isinstance(text, str):
-        return jsonify({"error": "input is required (may be empty string)"}), 400
+    clean, error = parse_simulate(request.get_json(force=True, silent=True) or {})
+    if error:
+        return jsonify({"error": error}), 400
     try:
-        result, steps, metrics, analysis = run_simulation(algorithm, text, key, mode, extra)
+        result, steps, metrics, analysis = run_simulation(
+            clean["algorithm"], clean["text"], clean["key"], clean["mode"], clean["extra"]
+        )
     except ValueError as e:
         # Expected domain errors (unknown algorithm, bad params) → 400.
         # Unexpected exceptions propagate to the 500 JSON handler.
@@ -85,22 +77,21 @@ def simulate():
     except Exception:
         user_id = None
 
-    record = Simulation(
-        user_id=user_id,
-        algorithm=algorithm,
-        input_text=text,
-        params={"key": key, "mode": mode, **extra},
-        result=result,
-        steps=steps,
-        duration_ms=metrics["time_ms"],
+    record = save_run(
+        user_id,
+        clean["algorithm"],
+        clean["text"],
+        clean["key"],
+        clean["mode"],
+        clean["extra"],
+        result,
+        steps,
+        metrics["time_ms"],
     )
-    db.session.add(record)
-    db.session.commit()
-
     return jsonify(
         {
             "id": record.id,
-            "algorithm": algorithm,
+            "algorithm": clean["algorithm"],
             "result": result,
             "steps": steps,
             "metrics": metrics,
@@ -112,23 +103,29 @@ def simulate():
 @simulation_bp.get("/history")
 @jwt_required()
 def history():
-    """List the authenticated user's runs, newest first (max 50).
+    """List the authenticated user's runs, newest first, paged.
+
+    Query args:
+        ``limit`` (default 50, max 100), ``offset`` (default 0).
 
     Auth:
         Requires ``Authorization: Bearer <token>`` (401 otherwise).
 
     Returns:
-        200 with a JSON array of records serialized *without* steps
-        (each carries ``steps_count`` instead) to keep the payload small.
+        200 with ``{total, limit, offset, items[]}``; items are
+        serialized *without* steps (each carries ``steps_count``)
+        to keep the payload small.
     """
-    ident = get_jwt_identity()
-    rows = (
-        Simulation.query.filter_by(user_id=int(ident))
-        .order_by(Simulation.created_at.desc())
-        .limit(50)
-        .all()
+    limit, offset = parse_pagination(request.args)
+    rows, total = list_runs(get_jwt_identity(), limit, offset)
+    return jsonify(
+        {
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "items": [r.to_dict() for r in rows],
+        }
     )
-    return jsonify([r.to_dict() for r in rows])
 
 
 @simulation_bp.get("/history/<int:sim_id>")
@@ -148,8 +145,7 @@ def history_detail(sim_id: int):
         200 with the record (``steps`` embedded); 404 with
         ``{"error": "not found"}``.
     """
-    ident = get_jwt_identity()
-    row = Simulation.query.filter_by(id=sim_id, user_id=int(ident)).first()
+    row = get_run(sim_id, get_jwt_identity())
     if not row:
         return jsonify({"error": "not found"}), 404
     return jsonify(row.to_dict(include_steps=True))

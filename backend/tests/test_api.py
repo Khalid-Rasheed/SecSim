@@ -96,9 +96,30 @@ def test_auth_and_history(client):
     )
     h = client.get("/api/history", headers={"Authorization": f"Bearer {token}"})
     assert h.status_code == 200
-    assert len(h.json) == 1
+    assert h.json["total"] == 1
+    assert len(h.json["items"]) == 1
     # history without token → 401
     assert client.get("/api/history").status_code == 401
+
+
+def test_history_pagination(client):
+    reg = client.post("/api/auth/register", json={"email": "p@p.com", "password": "secret123"})
+    token = reg.json["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    for i in range(3):
+        client.post(
+            "/api/simulate",
+            json={"algorithm": "caesar", "input": f"Hi {i}", "key": 1},
+            headers=headers,
+        )
+    page1 = client.get("/api/history?limit=2&offset=0", headers=headers).json
+    assert (page1["total"], page1["limit"], page1["offset"]) == (3, 2, 0)
+    assert len(page1["items"]) == 2
+    page2 = client.get("/api/history?limit=2&offset=2", headers=headers).json
+    assert len(page2["items"]) == 1
+    # caps and floors: limit clamps to 100, negatives floor to (1, 0)
+    capped = client.get("/api/history?limit=5000&offset=-5", headers=headers).json
+    assert (capped["limit"], capped["offset"]) == (100, 0)
 
 
 def test_register_rejects_bad_email(client):

@@ -327,6 +327,7 @@ register(
     type="encryption",
     family="asymmetric",
     kind="factorization",
+    security="educational",
     name={"ar": "RSA", "en": "RSA"},
     description={
         "ar": "تشفير بالمفتاح العام — مفاتيح صغيرة للتعليم فقط",

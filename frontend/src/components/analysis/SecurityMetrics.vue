@@ -1,8 +1,8 @@
 <!--
   SecurityMetrics — security analysis panel for a simulation result.
-  Renders four layers from the simulation store: measured metrics
-  (wall-clock ms + step count), theoretical complexity badges (Big-O),
-  strengths/weaknesses lists, and a Chart.js bar of execution time.
+  Renders measured metrics, complexity badges, strengths/weaknesses,
+  live computed security tests (entropy / keyspace / avalanche...),
+  and a Chart.js bar of execution time.
 -->
 <template>
   <div v-if="store.analysis" class="panel p-5">
@@ -20,6 +20,36 @@
         <i class="fa-solid fa-list-ol text-keyamber text-lg mb-1"></i>
         <div class="font-display font-bold text-xl" dir="ltr">{{ store.metrics?.steps }}</div>
         <div class="text-[0.7rem] text-muted">{{ $t('sim.steps') }}</div>
+      </div>
+    </div>
+
+    <!-- LIVE COMPUTED TESTS -->
+    <div class="panel-flat p-4 mb-4">
+      <p class="text-sm font-semibold mb-1">
+        <i class="fa-solid fa-flask-vial text-cipher me-1.5"></i>{{ $t('sim.tests') }}
+      </p>
+      <p class="text-[0.7rem] text-muted mb-3">{{ $t('sim.tests_hint') }}</p>
+      <p v-if="store.securityTestsLoading" class="text-xs text-muted">
+        <i class="fa-solid fa-circle-notch fa-spin me-1"></i>{{ $t('sim.tests_loading') }}
+      </p>
+      <div v-else class="space-y-2">
+        <div
+          v-for="test in store.securityTests"
+          :key="test.id"
+          class="flex gap-2.5 items-start rounded-xl border p-3"
+          :class="testBorder(test.status)"
+        >
+          <i :class="[testIcon(test.status), 'text-sm mt-0.5']"></i>
+          <div class="flex-1">
+            <p class="text-xs font-bold">{{ test.name?.[locale] || test.name?.en }}</p>
+            <p class="text-[0.7rem] text-mist/90 leading-relaxed">
+              {{ test.summary?.[locale] || test.summary?.en }}
+            </p>
+          </div>
+        </div>
+        <p v-if="!store.securityTests.length" class="text-[0.7rem] text-muted">
+          {{ $t('sim.tests_loading') }}
+        </p>
       </div>
     </div>
 
@@ -91,6 +121,19 @@ const weaknesses = computed(
   () => store.analysis?.weaknesses?.[locale.value] || store.analysis?.weaknesses?.en || []
 )
 const complexity = computed(() => store.analysis?.complexity || null)
+
+function testBorder(status) {
+  if (status === 'pass') return 'border-cipher/30 bg-cipher/5'
+  if (status === 'fail') return 'border-dangerx/30 bg-dangerx/5'
+  if (status === 'warn') return 'border-keyamber/30 bg-keyamber/5'
+  return 'border-[rgba(148,163,184,0.2)] bg-panel2'
+}
+function testIcon(status) {
+  if (status === 'pass') return 'fa-solid fa-circle-check text-cipher'
+  if (status === 'fail') return 'fa-solid fa-circle-xmark text-dangerx'
+  if (status === 'warn') return 'fa-solid fa-triangle-exclamation text-keyamber'
+  return 'fa-solid fa-circle-info text-muted'
+}
 
 function draw() {
   if (!chartEl.value || !store.metrics) return

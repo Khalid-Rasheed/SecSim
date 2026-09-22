@@ -282,6 +282,7 @@ register(
     type="attack",
     family="attack",
     kind=None,
+    security="educational",
     name={"ar": "القوة الغاشمة", "en": "Brute Force"},
     description={
         "ar": "هجوم يجرب مفاتيح قيصر الـ 25 على نص مشفر",

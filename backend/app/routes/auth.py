@@ -9,48 +9,25 @@ Abuse protection: ``register`` is capped at 5/min and ``login`` at
 10/min per IP (Flask-Limiter; HTTP 429 afterwards), so credential
 stuffing and mass account creation are throttled at the edge.
 
+Thin-route note: validation lives in :mod:`app.schemas`, persistence in
+:app:mod:`app.services.auth_service`; handlers below only map between
+HTTP and those layers.
+
 Token model: a signed JWT whose identity is the user's numeric id
 (as a string), valid for ``JWT_ACCESS_TOKEN_EXPIRES`` (default 12h).
 The frontend stores it in ``localStorage`` and sends it as
 ``Authorization: Bearer <token>``.
 """
 
-import re
-
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
-from app import db, limiter
-from app.models.user import User
+from app import limiter
+from app.schemas import parse_login, parse_register
+from app.services.auth_service import authenticate, create_user, get_user
+from app.services.errors import ServiceError
 
 auth_bp = Blueprint("auth", __name__)
-
-# Practical email shape check (not a full RFC 5322 parser — that
-# belongs to a dedicated library). Rejects missing "@", missing TLD,
-# spaces and over-long input before anything touches the database.
-EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,253}\.[A-Za-z]{2,}$")
-
-# Password policy: at least 8 characters with both a letter and a
-# digit. Deliberately modest for a teaching lab (no symbol mandates
-# that drive users to `Password1!`), but far above the old 6-char min.
-MIN_PASSWORD_LEN = 8
-
-
-def _password_error(password: str):
-    """Validate ``password`` against the platform policy.
-
-    Args:
-        password: Plain-text candidate password.
-
-    Returns:
-        An error message string when the password is rejected,
-        otherwise ``None``.
-    """
-    if len(password) < MIN_PASSWORD_LEN:
-        return f"password must be at least {MIN_PASSWORD_LEN} characters"
-    if not re.search(r"[A-Za-z]", password) or not re.search(r"[0-9]", password):
-        return "password must contain at least one letter and one digit"
-    return None
 
 
 @auth_bp.post("/register")
@@ -62,14 +39,13 @@ def register():
 
         {"email": "sara@mail.com", "password": "secret123", "name": "Sara"}
 
-    Validation performed (first failure wins):
-        - ``email`` and ``password`` are required (400 otherwise).
+    Validation (first failure wins, all 400 except duplicates):
+        - ``email`` and ``password`` are required.
         - ``email`` must match a sane ``user@domain.tld`` shape
-          (400 ``"invalid email address"`` otherwise).
+          (``"invalid email address"`` otherwise).
         - ``password`` must satisfy the policy: ≥ 8 chars with a
-          letter and a digit (400 otherwise).
-        - ``email`` is lower-cased/trimmed and must be unique
-          (409 ``"email already registered"`` otherwise).
+          letter and a digit.
+        - ``email`` must be unique (409 ``"email already registered"``).
 
     Rate limit:
         5 requests/minute per IP (429 afterwards) to block mass
@@ -83,24 +59,15 @@ def register():
         ...     json={"email": "a@a.com", "password": "secret123"})
         <201 with token + user>
     """
-    data = request.get_json(force=True, silent=True) or {}
-    # Normalise the email so "Sara@Mail.com" and "sara@mail.com" collide.
-    email = (data.get("email") or "").strip().lower()
-    password = data.get("password") or ""
-    name = (data.get("name") or "").strip()
-    if not email or not password:
-        return jsonify({"error": "email and password are required"}), 400
-    if not EMAIL_RE.match(email):
-        return jsonify({"error": "invalid email address"}), 400
-    pw_error = _password_error(password)
-    if pw_error:
-        return jsonify({"error": pw_error}), 400
-    if User.query.filter_by(email=email).first():
-        return jsonify({"error": "email already registered"}), 409
-    user = User(email=email, name=name or None)
-    user.set_password(password)  # stores a salted hash, never the password
-    db.session.add(user)
-    db.session.commit()
+    # `silent=True` turns malformed JSON into {} so we answer with our
+    # own 400 message instead of raising.
+    clean, error = parse_register(request.get_json(force=True, silent=True) or {})
+    if error:
+        return jsonify({"error": error}), 400
+    try:
+        user = create_user(clean["email"], clean["password"], clean["name"])
+    except ServiceError as e:
+        return jsonify({"error": e.message}), e.status
     # Identity is the numeric id as a string (JWT "sub" must be a string).
     token = create_access_token(identity=str(user.id))
     return jsonify({"token": token, "user": user.to_dict()}), 201
@@ -127,11 +94,11 @@ def login():
         200 with ``{"token": <jwt>, "user": {...}}``;
         401 with ``{"error": "invalid credentials"}``.
     """
-    data = request.get_json(force=True, silent=True) or {}
-    email = (data.get("email") or "").strip().lower()
-    password = data.get("password") or ""
-    user = User.query.filter_by(email=email).first()
-    if not user or not user.check_password(password):
+    clean, error = parse_login(request.get_json(force=True, silent=True) or {})
+    if error:
+        return jsonify({"error": error}), 400
+    user = authenticate(clean["email"], clean["password"])
+    if not user:
         return jsonify({"error": "invalid credentials"}), 401
     token = create_access_token(identity=str(user.id))
     return jsonify({"token": token, "user": user.to_dict()})
@@ -150,7 +117,7 @@ def me():
     Returns:
         200 with the user dict; 404 if the token's user no longer exists.
     """
-    user = User.query.get(int(get_jwt_identity()))
+    user = get_user(get_jwt_identity())
     if not user:
         return jsonify({"error": "not found"}), 404
     return jsonify(user.to_dict())

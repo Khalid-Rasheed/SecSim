@@ -8,6 +8,7 @@ Route:
 
 from flask import Blueprint, jsonify, request
 
+from app.schemas import parse_analyze
 from app.services.simulator import analyze_algorithm, list_algorithms
 
 analysis_bp = Blueprint("analysis", __name__)
@@ -31,12 +32,12 @@ def analyze():
         algorithm or invalid parameters.
     """
     data = request.get_json(force=True, silent=True) or {}
-    algorithm = data.get("algorithm")
-    if not algorithm:
-        return jsonify({"error": "algorithm is required"}), 400
+    clean, error = parse_analyze(data)
+    if error:
+        return jsonify({"error": error}), 400
+    algorithm, params = clean["algorithm"], clean["parameters"]
     if algorithm not in {a["id"] for a in list_algorithms()}:
         return jsonify({"error": f"Unsupported algorithm: {algorithm}"}), 400
-    params = data.get("parameters", {}) or {}
     try:
         return jsonify({"algorithm": algorithm, "analysis": analyze_algorithm(algorithm, params)})
     except ValueError as e:

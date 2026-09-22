@@ -48,12 +48,11 @@
             <i class="fa-solid fa-circle-notch fa-spin me-1.5"></i>{{ $t('sim.brief_loading') }}
           </p>
           <template v-else>
-            <!-- ENCRYPTION: symmetric / asymmetric families, each grouped by kind -->
-            <p class="px-3 pt-2 pb-1 text-[0.68rem] font-extrabold text-mist uppercase tracking-wide">
-              <i class="fa-solid fa-lock text-teal-600 me-1.5"></i>{{ $t('tax.encryption') }}
-            </p>
-            <div v-for="fam in menuEncryption" :key="fam.family" class="mb-1">
-              <p class="px-3 py-1 text-[0.7rem] font-bold text-teal-700">{{ $t('tax.' + fam.family) }}</p>
+            <!-- 3 TABS: symmetric / asymmetric / hashing (each grouped by kind) -->
+            <div v-for="fam in menuTabs" :key="fam.family" class="mb-1">
+              <p class="px-3 pt-2 pb-1 text-[0.68rem] font-extrabold text-mist uppercase tracking-wide">
+                <i :class="[fam.icon, 'me-1.5', fam.color]"></i>{{ $t('tax.' + fam.family) }}
+              </p>
               <div v-for="g in fam.kinds" :key="g.kind" class="mb-1">
                 <p class="px-3 text-[0.65rem] text-muted font-semibold">{{ $t('tax.' + g.kind) }}</p>
                 <router-link
@@ -66,17 +65,27 @@
                   <i :class="[algoIcon(a.type), 'text-teal-600 text-xs w-4 text-center']"></i>
                   <span class="font-mono text-xs font-bold text-mist" dir="ltr">{{ a.id }}</span>
                   <span class="text-[0.7rem] text-muted truncate">{{ a.name?.[locale] || '' }}</span>
+                  <span
+                    v-if="a.security === 'broken' || a.security === 'secure'"
+                    :class="[
+                      'ms-auto text-[0.6rem] font-mono px-1.5 py-px rounded border shrink-0',
+                      a.security === 'secure'
+                        ? 'text-teal-700 border-teal-600/30 bg-teal-700/5'
+                        : 'text-red-600 border-red-500/30 bg-red-500/5'
+                    ]"
+                    >{{ $t('alg.badge_' + a.security) }}</span
+                  >
                 </router-link>
               </div>
             </div>
 
-            <!-- HASHING + ATTACKS: flat groups -->
-            <div v-for="sec in menuFlat" :key="sec.key">
+            <!-- ATTACK LAB -->
+            <div v-if="menuAttacks.length">
               <p class="px-3 pt-2 pb-1 text-[0.68rem] font-extrabold text-mist uppercase tracking-wide">
-                <i :class="[sec.icon, 'me-1.5', sec.color]"></i>{{ $t('tax.' + sec.key) }}
+                <i class="fa-solid fa-burst me-1.5 text-keyamber"></i>{{ $t('tax.attack_lab') }}
               </p>
               <router-link
-                v-for="a in sec.items"
+                v-for="a in menuAttacks"
                 :key="a.id"
                 :to="{ path: '/simulator', query: { algo: a.id } }"
                 class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-teal-700/5 transition"
@@ -164,43 +173,48 @@ function closeMenu() {
   open.value = false
 }
 
-// Group encryption entries: family (symmetric/asymmetric) → kind
-// (stream/block/factorization/...) → items, preserving catalog order.
-const menuEncryption = computed(() => {
-  const enc = sim.algorithms.filter((a) => a.type === 'encryption')
-  return ['symmetric', 'asymmetric']
-    .map((family) => {
-      const members = enc.filter((a) => a.family === family)
-      if (!members.length) return null
-      const kinds = []
-      for (const a of members) {
-        let g = kinds.find((k) => k.kind === a.kind)
-        if (!g) {
-          g = { kind: a.kind || 'other', items: [] }
-          kinds.push(g)
-        }
-        g.items.push(a)
+// Three tabs (symmetric / asymmetric / hashing), each grouped by kind,
+// preserving catalog order. Prefers the /api/taxonomy tree when loaded,
+// falls back to client-side grouping for older backends.
+const menuTabs = computed(() => {
+  if (sim.taxonomy?.tabs?.length) return sim.taxonomy.tabs.map((t) => ({
+    family: t.family,
+    icon:
+      t.family === 'symmetric'
+        ? 'fa-solid fa-key'
+        : t.family === 'asymmetric'
+          ? 'fa-solid fa-key'
+          : 'fa-solid fa-fingerprint',
+    color: 'text-teal-600',
+    kinds: t.kinds
+  }))
+  const tabs = []
+  const conf = [
+    { family: 'symmetric', icon: 'fa-solid fa-key', color: 'text-teal-600' },
+    { family: 'asymmetric', icon: 'fa-solid fa-key', color: 'text-teal-600' },
+    { family: 'hashing', icon: 'fa-solid fa-fingerprint', color: 'text-teal-600' }
+  ]
+  for (const c of conf) {
+    const members = sim.algorithms.filter((a) => a.family === c.family)
+    if (!members.length) continue
+    const kinds = []
+    for (const a of members) {
+      let g = kinds.find((k) => k.kind === (a.kind || 'other'))
+      if (!g) {
+        g = { kind: a.kind || 'other', items: [] }
+        kinds.push(g)
       }
-      return { family, kinds }
-    })
-    .filter(Boolean)
+      g.items.push(a)
+    }
+    tabs.push({ ...c, kinds })
+  }
+  return tabs
 })
 
-// Non-encryption sections render flat (no subtype tree).
-const menuFlat = computed(() => [
-  {
-    key: 'hashing',
-    icon: 'fa-solid fa-fingerprint',
-    color: 'text-teal-600',
-    items: sim.algorithms.filter((a) => a.type === 'hashing')
-  },
-  {
-    key: 'attack',
-    icon: 'fa-solid fa-burst',
-    color: 'text-keyamber',
-    items: sim.algorithms.filter((a) => a.type === 'attack')
-  }
-])
+const menuAttacks = computed(() => {
+  if (sim.taxonomy?.attacks?.length) return sim.taxonomy.attacks
+  return sim.algorithms.filter((a) => a.type === 'attack')
+})
 
 function toggleLang() {
   const next = locale.value === 'ar' ? 'en' : 'ar'

@@ -60,16 +60,36 @@
       </div>
     </section>
 
-    <!-- ALGORITHMS -->
+    <!-- ALGORITHMS: 3 tabs -->
     <section class="max-w-6xl mx-auto px-4 py-10">
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center justify-between mb-4">
         <p class="eyebrow">{{ $t('home.algos') }}</p>
         <router-link to="/simulator" class="text-sm text-cipher hover:underline">
           {{ $t('home.open_sim') }} <i class="fa-solid fa-arrow-left text-xs ms-1 rtl:rotate-180"></i>
         </router-link>
       </div>
+      <p class="text-[0.7rem] text-muted mb-3">{{ $t('tax.tabs_title') }}</p>
+      <div class="flex gap-1.5 mb-6 flex-wrap">
+        <button
+          v-for="tab in homeTabs"
+          :key="tab.key"
+          :class="[
+            'px-4 py-2 rounded-xl text-xs font-bold border transition',
+            homeTab === tab.key
+              ? 'bg-cipher/10 border-cipher text-cipher'
+              : 'bg-panel2 border-[rgba(148,163,184,0.16)] text-muted hover:border-muted'
+          ]"
+          @click="homeTab = tab.key"
+        >
+          <i :class="[tab.icon, 'me-1.5']"></i>{{ tab.title }}
+        </button>
+      </div>
       <div class="grid sm:grid-cols-2 gap-4">
-        <div v-for="a in sim.algorithms" :key="a.id" class="panel-flat p-5 flex gap-4 items-start">
+        <div
+          v-for="a in homeItems"
+          :key="a.id"
+          class="panel-flat p-5 flex gap-4 items-start"
+        >
           <span
             class="w-10 h-10 rounded-lg bg-keyamber/10 border border-keyamber/30 flex items-center justify-center shrink-0"
           >
@@ -77,17 +97,33 @@
           </span>
           <div class="flex-1">
             <h3 class="font-display font-semibold" dir="ltr">{{ a.id }}</h3>
-            <p class="text-xs font-mono text-muted mb-1.5" dir="ltr">{{ a.type }}</p>
+            <p class="text-xs font-mono text-muted mb-1.5" dir="ltr">
+              {{ a.family }}<span v-if="a.kind"> · {{ a.kind }}</span>
+            </p>
             <p class="text-sm text-muted mb-2">{{ a.description?.[locale] || a.description?.en }}</p>
-            <div v-if="a.complexity" class="flex gap-1.5 flex-wrap mb-2" dir="ltr">
+            <div class="flex gap-1.5 flex-wrap mb-2" dir="ltr">
               <span
-                class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-cipher/10 border border-cipher/30 text-cipher"
-                >T: {{ a.complexity.time }}</span
+                v-if="a.security"
+                :class="[
+                  'font-mono text-[0.65rem] px-2 py-0.5 rounded border',
+                  a.security === 'secure'
+                    ? 'bg-cipher/10 border-cipher/30 text-cipher'
+                    : a.security === 'broken'
+                      ? 'bg-dangerx/10 border-dangerx/30 text-dangerx'
+                      : 'bg-keyamber/10 border-keyamber/30 text-keyamber'
+                ]"
+                >{{ $t('alg.badge_' + a.security) }}</span
               >
-              <span
-                class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-keyamber/10 border border-keyamber/30 text-keyamber"
-                >S: {{ a.complexity.space }}</span
-              >
+              <template v-if="a.complexity">
+                <span
+                  class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-cipher/10 border border-cipher/30 text-cipher"
+                  >T: {{ a.complexity.time }}</span
+                >
+                <span
+                  class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-keyamber/10 border border-keyamber/30 text-keyamber"
+                  >S: {{ a.complexity.space }}</span
+                >
+              </template>
             </div>
             <router-link :to="'/algorithms/' + a.id" class="text-xs text-cipher hover:underline">
               {{ $t('alg.learn_more') }}
@@ -101,12 +137,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSimulationStore } from '../stores/simulationStore'
 import CipherTape from '../components/common/CipherTape.vue'
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const sim = useSimulationStore()
 
 function algoIcon(type) {
@@ -114,6 +150,14 @@ function algoIcon(type) {
   if (type === 'hashing') return 'fa-solid fa-fingerprint'
   return 'fa-solid fa-key'
 }
+
+const homeTab = ref('symmetric')
+const homeTabs = computed(() => [
+  { key: 'symmetric', title: t('tax.symmetric'), icon: 'fa-solid fa-key' },
+  { key: 'asymmetric', title: t('tax.asymmetric'), icon: 'fa-solid fa-key' },
+  { key: 'hashing', title: t('tax.hashing'), icon: 'fa-solid fa-fingerprint' }
+])
+const homeItems = computed(() => sim.algorithms.filter((a) => a.family === homeTab.value))
 
 const tape = [
   { in: 'H', out: 'K' },

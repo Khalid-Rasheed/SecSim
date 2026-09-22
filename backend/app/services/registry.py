@@ -29,10 +29,20 @@ Registry entry shape::
     }
 
 Taxonomy (drives the frontend dropdown and simulator grouping):
-    - type="encryption" → family "symmetric" (kinds: "stream",
-      "block") or "asymmetric" (kinds: "factorization", ...).
-    - type="hashing" → family "hashing", kind None (listed flat).
-    - type="attack" → family "attack", kind None (listed flat).
+    - type="encryption" → family "symmetric" (kinds: "classical",
+      "stream", "block") or "asymmetric" (kinds: "factorization",
+      "discrete", "elliptic").
+    - type="hashing" → family "hashing" (kinds: "broken", "secure",
+      "password").
+    - type="attack" → family "attack", kind None (listed flat under
+      the attack lab).
+
+Top-level tabs (user-facing): symmetric | asymmetric | hashing
+(+ attack lab as a 4th lab section, not a cipher family).
+
+Security levels (meta["security"]):
+    "secure" (recommended), "legacy" (deprecated but not broken),
+    "broken" (must not use), "educational" (toy/demo only).
 """
 
 import importlib
@@ -42,13 +52,63 @@ import sys
 # id -> registry entry (see module docstring for the entry shape).
 REGISTRY = {}
 
+# Canonical taxonomy: tab → family → kinds. The frontend renders three
+# top tabs (symmetric / asymmetric / hashing) and one group per kind.
+# Attacks stay a separate lab section (type="attack", flat).
+TAXONOMY = {
+    "symmetric": {
+        "name": {"ar": "تناظرية", "en": "Symmetric"},
+        "kinds": {
+            "classical": {"ar": "كلاسيكية", "en": "Classical"},
+            "stream": {"ar": "انسيابية", "en": "Stream"},
+            "block": {"ar": "كتلية", "en": "Block"},
+        },
+    },
+    "asymmetric": {
+        "name": {"ar": "غير تناظرية", "en": "Asymmetric"},
+        "kinds": {
+            "factorization": {"ar": "تفكيك الأعداد", "en": "Factorization"},
+            "discrete": {"ar": "لوغاريتم منفصل", "en": "Discrete log"},
+            "elliptic": {"ar": "منحنيات إهليجية", "en": "Elliptic curve"},
+        },
+    },
+    "hashing": {
+        "name": {"ar": "التجزئة", "en": "Hashing"},
+        "kinds": {
+            "broken": {"ar": "مكسورة (تعليمية)", "en": "Broken"},
+            "secure": {"ar": "آمنة", "en": "Secure"},
+            "password": {"ar": "كلمات المرور", "en": "Password hashing"},
+        },
+    },
+}
+
+# Valid (family, kind) pairs — enforced at registration time so a typo
+# like kind="blcok" fails fast with a clear message instead of silently
+# vanishing from the UI tree.
+_VALID_TAXONOMY = {
+    ("symmetric", "classical"),
+    ("symmetric", "stream"),
+    ("symmetric", "block"),
+    ("asymmetric", "factorization"),
+    ("asymmetric", "discrete"),
+    ("asymmetric", "elliptic"),
+    ("hashing", "broken"),
+    ("hashing", "secure"),
+    ("hashing", "password"),
+    ("attack", None),
+}
+
+# Security levels shown as badges in the UI.
+_VALID_SECURITY = ("secure", "legacy", "broken", "educational")
+
 # Every algorithm module must expose these four attributes; missing
 # ones fail fast at import time with a clear ImportError.
 _REQUIRED_ATTRS = ("simulate", "analyze", "COMPLEXITY", "DETAILS")
 
 
 def algorithm(
-    id, *, type, name, description, params, keyspace=None, order=100, family=None, kind=None
+    id, *, type, name, description, params, keyspace=None, order=100, family=None, kind=None,
+    security="educational",
 ):
     """Attach metadata to an already-imported module object; validate.
 
@@ -71,9 +131,13 @@ def algorithm(
         family: Taxonomy family for menu grouping — ``"symmetric"`` /
             ``"asymmetric"`` for encryption, ``"hashing"`` / ``"attack"``
             otherwise (mirrors ``type`` there).
-        kind: Subtype within the family — e.g. ``"stream"`` / ``"block"``
-            under symmetric, ``"factorization"`` under asymmetric;
-            ``None`` for hashing/attack entries (shown flat).
+        kind: Subtype within the family — e.g. ``"classical"`` /
+            ``"stream"`` / ``"block"`` under symmetric,
+            ``"factorization"`` / ``"discrete"`` / ``"elliptic"``
+            under asymmetric, ``"broken"`` / ``"secure"`` /
+            ``"password"`` under hashing; ``None`` for attack entries.
+        security: One of ``"secure"`` | ``"legacy"`` | ``"broken"`` |
+            ``"educational"`` — drives the UI badge (green/amber/red).
 
     Raises:
         ImportError: If the module misses a required attribute or the
@@ -89,12 +153,22 @@ def algorithm(
             raise ImportError(f"algorithm '{id}' is missing: {', '.join(missing)}")
         if id in REGISTRY:
             raise ImportError(f"duplicate algorithm id: '{id}'")
+        if type not in ("encryption", "hashing", "attack"):
+            raise ImportError(f"algorithm '{id}': unknown type '{type}'")
+        if (family, kind) not in _VALID_TAXONOMY:
+            raise ImportError(
+                f"algorithm '{id}': invalid taxonomy ({family!r}, {kind!r}) — "
+                f"see TAXONOMY for valid pairs"
+            )
+        if security not in _VALID_SECURITY:
+            raise ImportError(f"algorithm '{id}': unknown security level '{security}'")
         REGISTRY[id] = {
             "meta": {
                 "id": id,
                 "type": type,
                 "family": family,
                 "kind": kind,
+                "security": security,
                 "name": name,
                 "description": description,
                 "params": params,
@@ -189,3 +263,30 @@ def ordered():
         drives ``GET /api/algorithms`` and the simulator UI.
     """
     return [REGISTRY[k] for k in sorted(REGISTRY, key=lambda k: REGISTRY[k]["order"])]
+
+
+def taxonomy():
+    """Build the hierarchical tree: tabs → kinds → algorithm metas.
+
+    Returns:
+        Dict ``{"tabs": [...], "attacks": [...]}`` where each tab is
+        ``{"family", "name"{ar,en}, "kinds": [{"kind", "name", "items": [meta]}]}``.
+        Empty kinds are omitted so the UI never renders hollow groups.
+        Powers ``GET /api/taxonomy`` and the 3-tab frontend layout.
+    """
+    discover()
+    tabs = []
+    for family in ("symmetric", "asymmetric", "hashing"):
+        fam_def = TAXONOMY[family]
+        kinds_out = []
+        for kind, kind_name in fam_def["kinds"].items():
+            items = [
+                e["meta"]
+                for e in ordered()
+                if e["meta"]["family"] == family and e["meta"]["kind"] == kind
+            ]
+            if items:
+                kinds_out.append({"kind": kind, "name": kind_name, "items": items})
+        tabs.append({"family": family, "name": fam_def["name"], "kinds": kinds_out})
+    attacks = [e["meta"] for e in ordered() if e["meta"]["type"] == "attack"]
+    return {"tabs": tabs, "attacks": attacks}

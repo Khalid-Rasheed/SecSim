@@ -194,7 +194,8 @@ register(
     "sha256",
     type="hashing",
     family="hashing",
-    kind=None,
+    kind="secure",
+    security="secure",
     name={"ar": "SHA-256", "en": "SHA-256"},
     description={
         "ar": "دالة تجزئة آمنة 256-بت",
@@ -202,5 +203,5 @@ register(
     },
     params=[],
     keyspace=None,
-    order=40,
+    order=44,
 )

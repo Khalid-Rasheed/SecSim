@@ -14,7 +14,7 @@ Both read from the self-registering :mod:`app.services.registry`
 
 from flask import Blueprint, jsonify
 
-from app.services.simulator import get_algorithm_detail, list_algorithms
+from app.services.simulator import get_algorithm_detail, get_taxonomy, list_algorithms
 
 algorithms_bp = Blueprint("algorithms", __name__)
 
@@ -28,6 +28,18 @@ def get_algorithms():
         params, keyspace, complexity}]`` ordered by registry ``order``.
     """
     return jsonify(list_algorithms())
+
+
+@algorithms_bp.get("/taxonomy")
+def get_taxonomy_tree():
+    """Return the hierarchical taxonomy tree.
+
+    Returns:
+        200 with ``{tabs: [{family, name{ar,en}, kinds: [{kind, name,
+        items: [meta]}]}], attacks: [meta]}`` — drives the 3-tab UI
+        (symmetric | asymmetric | hashing) plus the attack lab.
+    """
+    return jsonify(get_taxonomy())
 
 
 @algorithms_bp.get("/algorithms/<algo_id>")

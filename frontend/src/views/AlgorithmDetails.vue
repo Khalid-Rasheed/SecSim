@@ -24,6 +24,25 @@
             <p class="text-muted text-sm mt-2 leading-relaxed">
               {{ algo.description?.[locale] || algo.description?.en }}
             </p>
+            <div class="flex gap-1.5 flex-wrap mt-3" dir="ltr">
+              <span
+                v-if="algo.family"
+                class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-panel2 border border-[rgba(148,163,184,0.25)] text-muted"
+                >{{ algo.family }}<span v-if="algo.kind"> · {{ algo.kind }}</span></span
+              >
+              <span
+                v-if="algo.security"
+                :class="[
+                  'font-mono text-[0.65rem] px-2 py-0.5 rounded border',
+                  algo.security === 'secure'
+                    ? 'bg-cipher/10 border-cipher/30 text-cipher'
+                    : algo.security === 'broken'
+                      ? 'bg-dangerx/10 border-dangerx/30 text-dangerx'
+                      : 'bg-keyamber/10 border-keyamber/30 text-keyamber'
+                ]"
+                >{{ $t('alg.badge_' + algo.security) }}</span
+              >
+            </div>
           </div>
         </div>
         <div v-if="algo.complexity" class="flex gap-2 flex-wrap mt-5" dir="ltr">

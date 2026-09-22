@@ -22,7 +22,7 @@ Every simulation returns the same tuple::
 
 import time
 
-from app.services.registry import discover, lookup, ordered
+from app.services.registry import discover, lookup, ordered, taxonomy
 
 # Import every module under algorithms/{encryption,hashing,attacks} so
 # each one's register(...) call executes exactly once at startup.
@@ -39,6 +39,14 @@ def list_algorithms():
         ``GET /api/algorithms``.
     """
     return [entry["meta"] for entry in ordered()]
+
+
+def get_taxonomy():
+    """Return the hierarchical tree (tabs → kinds → items + attacks).
+
+    Powers ``GET /api/taxonomy`` — the 3-tab frontend layout.
+    """
+    return taxonomy()
 
 
 def get_algorithm_detail(algorithm: str):

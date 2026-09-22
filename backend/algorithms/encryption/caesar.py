@@ -244,7 +244,8 @@ register(
     "caesar",
     type="encryption",
     family="symmetric",
-    kind="stream",
+    kind="classical",
+    security="broken",
     name={"ar": "قيصر", "en": "Caesar"},
     description={
         "ar": "تشفير إبدالي بسيط بإزاحة ثابتة — تعليمي فقط",

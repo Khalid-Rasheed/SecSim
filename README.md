@@ -32,7 +32,9 @@
 ## The idea
 
 Textbooks show you *what* an algorithm outputs; SecSim shows you *how* it gets
-there. Pick an algorithm (Caesar, AES, RSA, SHA-256, MD5, Brute Force…), feed
+there. Pick an algorithm — Caesar, Vigenère, Playfair, RC4, AES, RSA,
+Diffie-Hellman, ElGamal, SHA-256, or a live attack like the Vigenère breaker
+(19 in total across symmetric / asymmetric / hashing + an attack lab) — feed
 it your own input — Arabic, English, symbols or emoji — and watch every
 transformation unfold as an inspectable, replayable step tape. Each algorithm
 also ships with a reference page (story, mechanics, parameters, security
@@ -56,8 +58,16 @@ Who is it for:
   `/algorithms/:id`, with a one-click jump into the simulator (`?algo=`).
 - **Security analysis** — strengths, weaknesses, keyspace metrics and
   Big-O time/space complexity per algorithm, plus a Chart.js timing chart.
-- **Attack lab** — brute-force demo that tries all 25 Caesar keys and ranks
-  candidates statistically.
+- **Computed security tests** — `POST /api/security-tests` measures your
+  actual input live: entropy, keyspace/crack-time estimate, avalanche %
+  and birthday bound for hashes, salt/iteration checks for password KDFs.
+- **Side-by-side comparison** — `POST /api/compare` runs 2–4 algorithms on
+  one input (presets: MD5 vs SHA-256, AES-128 vs AES-256, SHA family) with
+  a bilingual verdict; results are never saved to history.
+- **Attack lab** — five real attacks, not animations: Caesar brute force,
+  Vigenère breaker (Kasiski + IC + column break), DH man-in-the-middle,
+  birthday-collision finder on truncated SHA-256, and dictionary attack on
+  unsalted MD5 with a salt lesson.
 - **Accounts & history** — JWT auth; simulations auto-save to your account
   when you are logged in; last 50 runs browsable in History.
 - **Bilingual UI** — Arabic (RTL, default) / English toggle; algorithm content
@@ -70,7 +80,7 @@ Who is it for:
 | Backend | Flask 3.x, Flask-SQLAlchemy, Flask-Migrate, Flask-CORS, Flask-JWT-Extended, Flask-Limiter, pycryptodome |
 | Frontend | Vue 3, Vite, Tailwind CSS, Pinia, Vue Router, Axios, Chart.js, vue-i18n, Font Awesome |
 | Database | SQLite (dev) / PostgreSQL-ready via `DATABASE_URL` |
-| DevOps | Docker + docker-compose (gunicorn / nginx), GitHub Actions CI, pytest (48 tests) |
+| DevOps | Docker + docker-compose (gunicorn / nginx), GitHub Actions CI, pytest (61 tests) |
 
 ## Project structure
 
@@ -79,17 +89,22 @@ backend/
   app/
     __init__.py        # app factory: extensions, blueprints, JSON errors
     models/            # User, Simulation (SQLAlchemy)
-    routes/            # auth / algorithms / simulation / analysis blueprints
-    services/          # registry.py (self-registering catalogue)
+    routes/            # auth / algorithms / simulation / analysis / security (tests + compare)
+    services/          # registry.py (self-registering catalogue + taxonomy tree)
                        # simulator.py (thin dispatcher, knows no algo by name)
-  algorithms/          # plug-ins: encryption/ hashing/ attacks/
-    encryption/caesar.py, aes.py, rsa.py ...
+                       # security.py (entropy / crack-time / avalanche helpers)
+  algorithms/          # plug-ins: encryption/ hashing/ attacks/ (19 total)
+    encryption/caesar.py, vigenere.py, playfair.py, rc4.py, aes.py,
+                 rsa.py, diffie_hellman.py, elgamal.py ...
+    hashing/md5.py, sha1.py, sha256.py, sha512.py, sha3.py, pbkdf2.py ...
+    attacks/brute_force.py, vigenere_breaker.py, dh_mitm.py,
+            birthday_collision.py, dictionary_attack.py ...
   tests/               # test_api / test_inputs / test_phase3 / test_registry
   config.py  run.py  requirements.txt  Dockerfile
 frontend/
   src/
     views/             # Home / Simulator / AlgorithmDetails / History / Profile / Login
-    components/        # CipherTape (signature), VisualizationArea, SecurityMetrics, Navbar
+    components/        # CipherTape (signature), VisualizationArea, SecurityMetrics, ComparePanel, Navbar
     stores/            # authStore / simulationStore (Pinia)
     router/  services/api.js (JWT interceptor)  i18n/ (ar.json, en.json)
 docs/api.md            # full endpoint reference
@@ -127,8 +142,9 @@ Set `frontend/.env`: `VITE_API_URL=http://localhost:5000/api` (or rely on Vite p
 
 ```powershell
 cd backend
-py -m pytest -q        # 48 tests: API, input matrix (AR/EN/emoji/empty),
-                       # Phase-3 algos, registry contract guards
+py -m pytest -q        # 61 tests: API, input matrix (AR/EN/emoji/empty),
+                       # Phase-3 algos incl. attack roundtrips, registry
+                       # contract + taxonomy + security-tests/compare guards
 ```
 
 ## Docker (full stack)
@@ -151,13 +167,16 @@ Base URL: `http://localhost:5000/api`. Error bodies are always JSON:
 | Method & path | Auth | Description |
 |---|---|---|
 | `GET /api/health` | — | Liveness probe → `{status: ok}` |
-| `GET /api/algorithms` | — | Catalog: `[{id, type, name{ar,en}, description{ar,en}, params, keyspace, complexity}]` |
+| `GET /api/algorithms` | — | Catalog: `[{id, type, family, kind, security, name{ar,en}, description{ar,en}, params, keyspace, complexity}]` (19 entries) |
+| `GET /api/taxonomy` | — | Hierarchical tree: `{tabs: [{family, kinds: [...]}]}` (symmetric / asymmetric / hashing) + `attacks` lab |
 | `GET /api/algorithms/<id>` | — | Full entry + bilingual `details` guide (overview, history, how_it_works, parameters, security, uses) |
 | `POST /api/auth/register` | — | `{email, password, name?}` → `{token, user}` (201). Email must be `user@domain.tld`; password ≥ 8 chars with a letter and a digit. **5/min/IP** |
 | `POST /api/auth/login` | — | `{email, password}` → `{token, user}`. Wrong credentials → identical 401 (no email enumeration). **10/min/IP** |
 | `GET /api/auth/me` | Bearer | Current-user profile |
-| `POST /api/simulate` | Optional | `{algorithm, input, key?, mode?, key_text?, key_size?, rsa_p?, rsa_q?, rsa_e?}` → `{id, result, steps[], metrics{time_ms, steps}, analysis}`. Saved anonymously, or linked to you when a token is sent |
+| `POST /api/simulate` | Optional | `{algorithm, input, ...params}` → `{id, result, steps[], metrics{time_ms, steps}, analysis}`. Saved anonymously, or linked to you when a token is sent. Extra params per algorithm: `key` (caesar), `vigenere_key`, `playfair_key`, `rc4_key`, `key_text` + `key_size` (aes), `rsa_p/q/e`, `dh_p/g/a/b`, `mitm_e/f` (dh_mitm), `collision_bits` (birthday), `elgamal_p/g/x/k` |
 | `POST /api/analyze` | — | `{algorithm, parameters?}` → `{algorithm, analysis}` (no simulation) |
+| `POST /api/security-tests` | — | `{algorithm, input, parameters?}` → `{algorithm, tests[]}` — live entropy / keyspace / avalanche / collision / salt measurements |
+| `POST /api/compare` | — | `{comparisons: [{algorithm, input, parameters?}]}` (2–4) → `{results[], verdict{ar,en}}` (never saved to history) |
 | `GET /api/history` | Bearer | Your last 50 runs, newest first (without step traces) |
 | `GET /api/history/<id>` | Bearer | One run with full `steps` (owner-only; others → 404) |
 
@@ -182,11 +201,23 @@ larger scripts need bigger `p`/`q`, which the UI lets you set.
 | Algorithm | Time | Space | n = |
 |---|---|---|---|
 | Caesar | O(n) | O(n) | characters |
+| Vigenère | O(n) | O(n) | characters (keyspace grows with key length) |
+| Playfair | O(n) | O(n) | characters (one 5×5 lookup per digraph) |
+| RC4 | O(n) | O(1) | input bytes (fixed 256-byte setup) |
 | AES-CBC | O(n) | O(n) | input bytes (fixed 10/12/14 rounds) |
 | RSA | O(n · log e) | O(n) | message chars (modular exponentiation each) |
+| Diffie-Hellman | O(log p) | O(1) | modulus bits (one exponentiation per party) |
+| ElGamal | O(n · log p) | O(n) | message chars (two exponentiations each) |
 | SHA-256 | O(n) | O(1) | input bytes (fixed 256-bit state) |
-| MD5 | O(n) | O(1) | input bytes (fixed 128-bit state) |
+| SHA-512 | O(n) | O(1) | input bytes (fixed 512-bit state) |
+| SHA-3 | O(n) | O(1) | input bytes (fixed 1600-bit sponge) |
+| MD5 / SHA-1 | O(n) | O(1) | input bytes (broken — teaching only) |
+| PBKDF2 | O(iterations) | O(1) | iteration count (slowness is deliberate) |
 | Brute Force | O(25 · n) | O(n) | ciphertext length |
+| Vigenère breaker | O(12 · (n + 26 · n)) | O(n) | ciphertext length (lengths × columns × shifts) |
+| DH MITM | O(log p) | O(1) | modulus bits (a few exponentiations) |
+| Birthday collision | O(2^(n/2)) | O(2^(n/2)) | truncated digest bits (square-root bound) |
+| Dictionary attack | O(W) | O(1) | wordlist size (one cheap hash per word) |
 
 ## Adding an algorithm (single file, zero edits elsewhere)
 1. Create `backend/algorithms/<encryption|hashing|attacks>/<id>.py` with:
@@ -218,7 +249,7 @@ first (setup, branch naming, PR checklist), open algorithm ideas as an
 report vulnerabilities privately per [SECURITY.md](SECURITY.md).
 
 ## Roadmap
-- Dictionary attack, MITM demo, algorithm comparison view, export PDF/CSV
+- Export PDF/CSV, elliptic-curve (ECC) teaching module, ChaCha20, frequency-analysis visualizer
 
 ## License
 MIT — free for educational use.
