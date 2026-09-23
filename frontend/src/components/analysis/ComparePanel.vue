@@ -35,10 +35,14 @@
 
     <div
       v-if="store.compareVerdict && !store.compareLoading"
-      class="flex items-start gap-2 bg-cipher/5 border border-cipher/30 text-mist text-xs font-semibold rounded-xl px-3.5 py-3 mb-3"
+      class="rounded-xl border border-keyamber/40 bg-keyamber/5 px-3.5 py-3 mb-3"
     >
-      <i class="fa-solid fa-trophy text-keyamber mt-0.5 shrink-0"></i>
-      <span>{{ store.compareVerdict[locale] || store.compareVerdict.en }}</span>
+      <p class="flex items-center gap-2 text-sm font-extrabold text-keyamber mb-1">
+        <i class="fa-solid fa-trophy"></i>{{ $t('ux.winner') }}
+      </p>
+      <p class="text-xs text-mist/90 font-semibold leading-relaxed">
+        {{ store.compareVerdict[locale] || store.compareVerdict.en }}
+      </p>
     </div>
 
     <div v-if="store.compareResults.length && !store.compareLoading" class="grid md:grid-cols-3 gap-3">
@@ -58,7 +62,13 @@
             >{{ $t('alg.badge_' + r.meta.security) }}</span
           >
         </div>
-        <p class="font-mono text-[0.65rem] text-cipher break-all mb-3" dir="ltr">{{ r.result_preview }}</p>
+        <p v-if="showOut[r.algorithm + (r.analysis_metrics?.key_bits || '')]" class="font-mono text-[0.65rem] text-muted break-all mb-3" dir="ltr">{{ r.result }}</p>
+        <button
+          class="text-[0.65rem] text-cipher hover:underline mb-3"
+          @click="toggleOut(r)"
+        >
+          {{ showOut[r.algorithm + (r.analysis_metrics?.key_bits || '')] ? $t('ux.hide_output') : $t('ux.show_output') }}
+        </button>
         <dl class="space-y-1.5 text-[0.7rem]">
           <div v-if="r.digest_bits" class="flex justify-between gap-2">
             <dt class="text-muted">{{ $t('compare.digest') }}</dt>
@@ -94,6 +104,12 @@ import { useSimulationStore } from '../../stores/simulationStore'
 const { locale, t } = useI18n()
 const store = useSimulationStore()
 const activePreset = ref(null)
+/** Full-output visibility per result column (keyed by algorithm+keysize). */
+const showOut = ref({})
+function toggleOut(r) {
+  const k = r.algorithm + (r.analysis_metrics?.key_bits || '')
+  showOut.value[k] = !showOut.value[k]
+}
 
 const presets = computed(() => [
   {

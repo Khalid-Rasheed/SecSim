@@ -63,19 +63,20 @@
           </ul>
         </div>
 
-        <!-- ALGORITHMS -->
+        <!-- ALGORITHMS (live catalog: name + deep link into the bench) -->
         <div>
           <h4 class="font-display font-extrabold text-sm text-mist mb-4">{{ $t('footer.algos_title') }}</h4>
           <ul class="space-y-2.5 text-sm">
-            <li v-for="a in algos" :key="a">
+            <li v-for="a in footerAlgos" :key="a.id">
               <router-link
-                to="/simulator"
+                :to="{ path: '/simulator', query: { algo: a.id } }"
                 class="inline-flex items-center gap-2 text-muted hover:text-teal-700 font-semibold transition"
               >
+                <span class="font-semibold text-[0.8rem]">{{ a.name }}</span>
                 <span
                   class="font-mono text-[0.7rem] bg-panel2 border border-[rgba(15,23,42,0.08)] rounded-md px-1.5 py-0.5"
                   dir="ltr"
-                  >{{ a }}</span
+                  >{{ a.id }}</span
                 >
               </router-link>
             </li>
@@ -114,12 +115,23 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import Navbar from './components/common/Navbar.vue'
 import { useAuthStore } from './stores/authStore'
+import { useSimulationStore } from './stores/simulationStore'
 
-const algos = ['caesar', 'aes', 'rsa', 'sha256']
+/** Beginner-friendly footer shortcuts (one per family + the attack lab). */
+const FOOTER_PICKS = ['caesar', 'aes', 'rsa', 'sha256', 'brute_force']
+const { locale } = useI18n()
+const sim = useSimulationStore()
+const footerAlgos = computed(() =>
+  FOOTER_PICKS.map((id) => {
+    const meta = sim.algorithms.find((a) => a.id === id)
+    return { id, name: meta?.name?.[locale.value] || meta?.name?.en || id }
+  })
+)
 const router = useRouter()
 const route = useRoute()
 
@@ -133,6 +145,10 @@ function onUnauthorized() {
   if (route.path !== '/login') router.push({ path: '/login', query: { expired: '1' } })
 }
 
-onMounted(() => window.addEventListener('secsim:unauthorized', onUnauthorized))
+onMounted(() => {
+  window.addEventListener('secsim:unauthorized', onUnauthorized)
+  // Warm the catalog once so footer names render in the user language.
+  sim.fetchAlgorithms().catch(() => {})
+})
 onUnmounted(() => window.removeEventListener('secsim:unauthorized', onUnauthorized))
 </script>

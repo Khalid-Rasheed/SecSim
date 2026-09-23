@@ -13,11 +13,11 @@
       </span>
       <div class="flex-1 min-w-[200px]">
         <p class="eyebrow mb-1">{{ $t('sim.now_simulating') }}</p>
-        <h2 class="font-display font-bold text-3xl md:text-4xl tracking-tight leading-none" dir="ltr">
-          {{ store.currentMeta?.name?.en || store.algorithm }}
+        <h2 class="font-display font-bold text-3xl md:text-4xl tracking-tight leading-none">
+          {{ store.currentMeta?.name?.[locale] || store.currentMeta?.name?.en || store.algorithm }}
         </h2>
-        <p v-if="store.currentMeta?.name?.ar" class="text-lg font-semibold mt-1">
-          {{ store.currentMeta.name.ar }}
+        <p class="text-xs text-muted mt-1.5">
+          <i class="fa-solid fa-circle-info me-1"></i>{{ $t('ux.tabs_desc.' + tabForAlgorithm(store.algorithm)) }}
         </p>
       </div>
       <span
@@ -54,6 +54,9 @@
               <i :class="[tab.icon, 'mb-1 block']"></i>{{ tab.title }}
             </button>
           </div>
+          <p class="text-[0.7rem] text-muted mb-4">
+            <i class="fa-solid fa-circle-info me-1"></i>{{ $t('ux.tabs_desc.' + activeTab) }}
+          </p>
           <!-- Groups inside the active tab: one section per kind -->
           <div class="space-y-4">
             <div v-for="grp in pickerGroups" :key="grp.key">
@@ -78,9 +81,17 @@
                       store.algorithm === a.id ? 'text-cipher' : 'text-muted'
                     ]"
                   ></i>
-                  <div class="font-display font-semibold text-sm" dir="ltr">{{ a.id }}</div>
-                  <div class="flex gap-1 flex-wrap mt-1" dir="ltr">
-                    <span class="text-[0.65rem] text-muted font-mono">{{ a.kind || a.type }}</span>
+                  <div class="font-display font-semibold text-sm">{{ displayName(a) }}</div>
+                  <div class="flex gap-1 flex-wrap mt-1 items-center" dir="ltr">
+                    <span class="text-[0.65rem] text-muted font-mono">{{ a.id }}</span>
+                    <span
+                      :class="[
+                        'font-mono text-[0.6rem] px-1.5 py-px rounded border inline-flex items-center gap-1',
+                        levelBadgeClasses(levelFor(a))
+                      ]"
+                      ><i :class="[levelIcon(levelFor(a))]"></i
+                      >{{ $t('ux.level_' + levelFor(a)) }}</span
+                    >
                     <span
                       v-if="a.security"
                       :class="[
@@ -152,7 +163,7 @@
           <h2 class="text-sm font-semibold mb-3">
             <i class="fa-solid fa-keyboard text-cipher me-2"></i>{{ $t('sim.input') }}
           </h2>
-          <label class="block text-xs text-muted mb-1.5">{{ $t('sim.text') }}</label>
+          <label class="block text-xs text-muted mb-1.5">{{ $t('sim.text') }}<FieldHint tip-key="text" /></label>
           <input
             v-model="store.input"
             class="field w-full px-3 py-2.5 text-sm font-mono mb-1"
@@ -195,7 +206,7 @@
           </p>
           <div v-else class="mb-4"></div>
           <div v-if="store.algorithm === 'caesar'" class="mb-4">
-            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.key') }}</label>
+            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.key') }}<FieldHint tip-key="key" /></label>
             <input
               v-model.number="store.key"
               type="number"
@@ -206,7 +217,7 @@
             />
           </div>
           <div v-if="store.algorithm === 'vigenere'" class="mb-4">
-            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.vigenere_key') }}</label>
+            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.vigenere_key') }}<FieldHint tip-key="vigenere_key" /></label>
             <input
               v-model="store.vigenereKey"
               class="field w-full px-3 py-2.5 text-sm font-mono"
@@ -215,7 +226,7 @@
             />
           </div>
           <div v-if="store.algorithm === 'playfair'" class="mb-4">
-            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.playfair_key') }}</label>
+            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.playfair_key') }}<FieldHint tip-key="playfair_key" /></label>
             <input
               v-model="store.playfairKey"
               class="field w-full px-3 py-2.5 text-sm font-mono"
@@ -224,7 +235,7 @@
             />
           </div>
           <div v-if="store.algorithm === 'rc4'" class="mb-4">
-            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.rc4_key') }}</label>
+            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.rc4_key') }}<FieldHint tip-key="rc4_key" /></label>
             <input
               v-model="store.rc4Key"
               class="field w-full px-3 py-2.5 text-sm font-mono"
@@ -236,7 +247,7 @@
             v-if="['caesar', 'vigenere', 'playfair', 'rc4', 'aes', 'rsa', 'elgamal'].includes(store.algorithm)"
             class="mb-4"
           >
-            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.mode') }}</label>
+            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.mode') }}<FieldHint tip-key="mode" /></label>
             <select v-model="store.mode" class="field w-full px-3 py-2.5 text-sm">
               <option value="encrypt">{{ $t('sim.encrypt') }}</option>
               <option value="decrypt">{{ $t('sim.decrypt') }}</option>
@@ -244,7 +255,7 @@
           </div>
           <div v-if="store.algorithm === 'aes'" class="grid grid-cols-2 gap-3 mb-4">
             <div class="col-span-2">
-              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.key_text') }}</label>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.key_text') }}<FieldHint tip-key="key_text" /></label>
               <input
                 v-model="store.aesKeyText"
                 class="field w-full px-3 py-2.5 text-sm font-mono"
@@ -252,7 +263,7 @@
               />
             </div>
             <div class="col-span-2">
-              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.key_size') }}</label>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.key_size') }}<FieldHint tip-key="key_size" /></label>
               <select
                 v-model.number="store.aesKeySize"
                 class="field w-full px-3 py-2.5 text-sm font-mono"
@@ -266,7 +277,7 @@
           </div>
           <div v-if="store.algorithm === 'rsa'" class="grid grid-cols-3 gap-3 mb-4">
             <div>
-              <label class="block text-xs text-muted mb-1.5" dir="ltr">p</label>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">p<FieldHint tip-key="rsa_p" /></label>
               <input
                 v-model.number="store.rsaP"
                 type="number"
@@ -275,7 +286,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-muted mb-1.5" dir="ltr">q</label>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">q<FieldHint tip-key="rsa_q" /></label>
               <input
                 v-model.number="store.rsaQ"
                 type="number"
@@ -284,7 +295,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-muted mb-1.5" dir="ltr">e</label>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">e<FieldHint tip-key="rsa_e" /></label>
               <input
                 v-model.number="store.rsaE"
                 type="number"
@@ -295,7 +306,7 @@
           </div>
           <div v-if="store.algorithm === 'diffie_hellman'" class="grid grid-cols-2 gap-3 mb-4">
             <div>
-              <label class="block text-xs text-muted mb-1.5" dir="ltr">p</label>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">p<FieldHint tip-key="dh_p" /></label>
               <input
                 v-model.number="store.dhP"
                 type="number"
@@ -304,7 +315,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-muted mb-1.5" dir="ltr">g</label>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">g<FieldHint tip-key="dh_g" /></label>
               <input
                 v-model.number="store.dhG"
                 type="number"
@@ -313,7 +324,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.dh_a') }}</label>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.dh_a') }}<FieldHint tip-key="dh_a" /></label>
               <input
                 v-model.number="store.dhA"
                 type="number"
@@ -322,7 +333,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.dh_b') }}</label>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.dh_b') }}<FieldHint tip-key="dh_b" /></label>
               <input
                 v-model.number="store.dhB"
                 type="number"
@@ -333,7 +344,7 @@
           </div>
           <div v-if="store.algorithm === 'dh_mitm'" class="grid grid-cols-2 gap-3 mb-4">
             <div>
-              <label class="block text-xs text-muted mb-1.5" dir="ltr">p</label>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">p<FieldHint tip-key="dh_p" /></label>
               <input
                 v-model.number="store.dhP"
                 type="number"
@@ -342,7 +353,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-muted mb-1.5" dir="ltr">g</label>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">g<FieldHint tip-key="dh_g" /></label>
               <input
                 v-model.number="store.dhG"
                 type="number"
@@ -351,7 +362,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.dh_a') }}</label>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.dh_a') }}<FieldHint tip-key="dh_a" /></label>
               <input
                 v-model.number="store.dhA"
                 type="number"
@@ -360,7 +371,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.dh_b') }}</label>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.dh_b') }}<FieldHint tip-key="dh_b" /></label>
               <input
                 v-model.number="store.dhB"
                 type="number"
@@ -369,7 +380,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.mitm_e') }}</label>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.mitm_e') }}<FieldHint tip-key="mitm_e" /></label>
               <input
                 v-model.number="store.mitmE"
                 type="number"
@@ -378,7 +389,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.mitm_f') }}</label>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.mitm_f') }}<FieldHint tip-key="mitm_f" /></label>
               <input
                 v-model.number="store.mitmF"
                 type="number"
@@ -388,7 +399,7 @@
             </div>
           </div>
           <div v-if="store.algorithm === 'birthday_collision'" class="mb-4">
-            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.collision_bits') }}</label>
+            <label class="block text-xs text-muted mb-1.5">{{ $t('sim.collision_bits') }}<FieldHint tip-key="collision_bits" /></label>
             <input
               v-model.number="store.collisionBits"
               type="number"
@@ -400,7 +411,7 @@
           </div>
           <div v-if="store.algorithm === 'elgamal'" class="grid grid-cols-2 gap-3 mb-4">
             <div>
-              <label class="block text-xs text-muted mb-1.5" dir="ltr">p</label>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">p<FieldHint tip-key="elgamal_p" /></label>
               <input
                 v-model.number="store.elgamalP"
                 type="number"
@@ -409,7 +420,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-muted mb-1.5" dir="ltr">g</label>
+              <label class="block text-xs text-muted mb-1.5" dir="ltr">g<FieldHint tip-key="elgamal_g" /></label>
               <input
                 v-model.number="store.elgamalG"
                 type="number"
@@ -418,7 +429,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.elgamal_x') }}</label>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.elgamal_x') }}<FieldHint tip-key="elgamal_x" /></label>
               <input
                 v-model.number="store.elgamalX"
                 type="number"
@@ -427,7 +438,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.elgamal_k') }}</label>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.elgamal_k') }}<FieldHint tip-key="elgamal_k" /></label>
               <input
                 v-model.number="store.elgamalK"
                 type="number"
@@ -438,7 +449,7 @@
           </div>
           <div v-if="store.algorithm === 'pbkdf2'" class="grid grid-cols-2 gap-3 mb-4">
             <div class="col-span-2">
-              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.pbkdf2_salt') }}</label>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.pbkdf2_salt') }}<FieldHint tip-key="pbkdf2_salt" /></label>
               <input
                 v-model="store.pbkdf2Salt"
                 class="field w-full px-3 py-2.5 text-sm font-mono"
@@ -447,7 +458,7 @@
               />
             </div>
             <div class="col-span-2">
-              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.pbkdf2_iterations') }}</label>
+              <label class="block text-xs text-muted mb-1.5">{{ $t('sim.pbkdf2_iterations') }}<FieldHint tip-key="pbkdf2_iterations" /></label>
               <input
                 v-model.number="store.pbkdf2Iterations"
                 type="number"
@@ -519,6 +530,8 @@ import { useSimulationStore } from '../stores/simulationStore'
 import VisualizationArea from '../components/simulation/VisualizationArea.vue'
 import SecurityMetrics from '../components/analysis/SecurityMetrics.vue'
 import ComparePanel from '../components/analysis/ComparePanel.vue'
+import FieldHint from '../components/common/FieldHint.vue'
+import { levelFor, levelBadgeClasses, levelIcon } from '../utils/ux'
 const store = useSimulationStore()
 const route = useRoute()
 const { t, locale } = useI18n()
@@ -534,14 +547,19 @@ function securityClass(level) {
   if (level === 'legacy') return 'bg-keyamber/10 border-keyamber/30 text-keyamber'
   return 'bg-panel2 border-[rgba(148,163,184,0.25)] text-muted'
 }
-// Breadcrumb for the masthead badge, e.g. "symmetric · stream".
-// Falls back to the flat type for entries without taxonomy.
+// Breadcrumb for the masthead badge, e.g. "تناظرية · كلاسيكية".
+// Family/kind keys are translated via tax.* (raw id as fallback).
 const taxBreadcrumb = computed(() => {
   const m = store.currentMeta
   if (!m) return '—'
-  if (m.family && m.kind) return `${m.family} · ${m.kind}`
-  return m.family || m.type
+  const fam = m.family ? t('tax.' + m.family) : m.type
+  if (m.family && m.kind) return `${fam} · ${t('tax.' + m.kind)}`
+  return fam
 })
+/** Human display name for picker buttons (bilingual name, raw id fallback). */
+function displayName(a) {
+  return a.name?.[locale.value] || a.name?.en || a.id
+}
 // Top tabs: symmetric | asymmetric | hashing | attack lab.
 const activeTab = ref('symmetric')
 const tabs = computed(() => [

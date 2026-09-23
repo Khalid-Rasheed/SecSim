@@ -72,6 +72,10 @@ Who is it for:
   when you are logged in; last 50 runs browsable in History.
 - **Bilingual UI** — Arabic (RTL, default) / English toggle; algorithm content
   itself is served bilingual from the API.
+- **Beginner-friendly UX** — guided 5-station learning path (`/learn`) with
+  local progress, difficulty badges, one-line `?` help on every simulator
+  input, a plain-language glossary, readable step snapshots, and a
+  searchable algorithm menu that works on mobile.
 
 ## Tech stack
 
@@ -103,8 +107,9 @@ backend/
   config.py  run.py  requirements.txt  Dockerfile
 frontend/
   src/
-    views/             # Home / Simulator / AlgorithmDetails / History / Profile / Login
-    components/        # CipherTape (signature), VisualizationArea, SecurityMetrics, ComparePanel, Navbar
+    views/             # Home / LearnPath (beginner track) / Simulator / AlgorithmDetails / History / Profile / Login
+    components/        # FieldHint (?) / CipherTape / VisualizationArea / SecurityMetrics / ComparePanel / Navbar
+    utils/             # ux.js (difficulty levels, attack↔victim maps, snapshot formatting)
     stores/            # authStore / simulationStore (Pinia)
     router/  services/api.js (JWT interceptor)  i18n/ (ar.json, en.json)
 docs/api.md            # full endpoint reference

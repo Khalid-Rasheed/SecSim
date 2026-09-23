@@ -211,6 +211,96 @@
     "keyspace": "Keyspace",
     "rounds": "Rounds"
   },
+  "ux": {
+    "tabs_desc": {
+      "symmetric": "One shared key — fastest, used for bulk data",
+      "asymmetric": "Public key encrypts, private decrypts — solves key exchange",
+      "hashing": "Fixed fingerprint with no key — proves integrity, hides nothing",
+      "attack": "A real breaking lab — try cracking weak ciphers yourself"
+    },
+    "level_beginner": "Beginner",
+    "level_intermediate": "Intermediate",
+    "level_advanced": "Advanced",
+    "start_here": "Start here",
+    "what_is_this": "What is this?",
+    "how": {
+      "eyebrow": "How it works",
+      "title": "Three steps to understand any algorithm",
+      "step1_title": "Pick an algorithm",
+      "step1_text": "Browse tabs by type, start with the green (beginner) badge — Caesar is a perfect first pick.",
+      "step2_title": "Run and watch",
+      "step2_text": "Enter your text and hit run: every character transforms in front of you, step by step.",
+      "step3_title": "Read the analysis",
+      "step3_text": "Grasp strengths, weaknesses and live tests on your input — then compare two algorithms."
+    },
+    "hints": {
+      "text": "The text to experiment on — try Arabic, English and symbols.",
+      "key": "Shift amount (0–25). Try 3 first — the historic classic.",
+      "vigenere_key": "A word repeated over the text. Longer is harder — try LEMON, then a longer word.",
+      "playfair_key": "A word to build the 5×5 square. Duplicates are dropped automatically.",
+      "rc4_key": "Any text as key — teaching only, RC4 is truly broken.",
+      "key_text": "Key text (teaching only — real keys are random).",
+      "key_size": "Key length in bits: bigger means more rounds and more security.",
+      "rsa_p": "Small prime for display (reality: 1024+ bits).",
+      "rsa_q": "Second prime — their product is n.",
+      "rsa_e": "Public exponent — 17 for display, 65537 in reality.",
+      "dh_p": "Public prime modulus both parties agree on.",
+      "dh_g": "Public generator — the base of both computations.",
+      "dh_a": "Alice's secret — never sent; change it and watch the shared secret move.",
+      "dh_b": "Bob's secret — never sent.",
+      "mitm_e": "Eve's secret toward Alice — lets Eve derive Alice's secret.",
+      "mitm_f": "Eve's secret toward Bob — lets Eve derive Bob's secret.",
+      "collision_bits": "Truncation bits: bigger means harder collision and longer wait (max 24).",
+      "elgamal_p": "Prime modulus (must exceed your characters' codes).",
+      "elgamal_g": "Public generator.",
+      "elgamal_x": "Private key — never published.",
+      "elgamal_k": "One-time random — reusing it leaks the text!",
+      "pbkdf2_salt": "Random salt — leave empty to generate one (that is the correct way).",
+      "pbkdf2_iterations": "Iteration count: higher means slower guessing (production: 210k+).",
+      "mode": "Encrypt turns plaintext into ciphertext; decrypt restores it — try both directions."
+    },
+    "glossary": [
+      { "term": "Key", "def": "A shared secret (or public/private pair) defining the transform — whoever knows it reads the message." },
+      { "term": "Hash", "def": "Fixed-length fingerprint with no key — proves a file is unchanged, hides nothing." },
+      { "term": "Avalanche", "def": "Flipping one input bit flips ~50% of the output — the mark of a good algorithm." },
+      { "term": "Entropy", "def": "Randomness measured in bits — higher means harder to guess." },
+      { "term": "Salt", "def": "Random value mixed into a password before hashing — defeats ready-made tables." },
+      { "term": "Keyspace", "def": "Number of possible keys — bigger means slower brute-force breaking." },
+      { "term": "Authentication", "def": "Proving the other party's identity — without it, DH falls to man-in-the-middle." },
+      { "term": "Man-in-the-middle", "def": "Attacker intercepting the channel and swapping messages — reads all without breaking math." }
+    ],
+    "learn": {
+      "eyebrow": "Learning path",
+      "title": "From zero to breaking ciphers in 5 stations",
+      "subtitle": "Each station: watch, then break — progress is saved on your device",
+      "progress": "stations done",
+      "stations_title": "Stations",
+      "glossary_title": "Quick glossary",
+      "stations": [
+        { "title": "First cipher: Caesar", "goal": "Grasp shifting, then break it by brute force", "algo": "caesar", "attack": "brute_force" },
+        { "title": "Keyword cipher: Vigenère", "goal": "See polyalphabets, then find the length with Kasiski", "algo": "vigenere", "attack": "vigenere_breaker" },
+        { "title": "Modern standard: AES", "goal": "Try 128-bit vs 256-bit keys and compare yourself", "algo": "aes", "attack": null },
+        { "title": "Public key: RSA & DH", "goal": "Exchange a secret with no secure channel, then break it with MITM", "algo": "diffie_hellman", "attack": "dh_mitm" },
+        { "title": "Fingerprints: hashing", "goal": "Flip a letter, watch the avalanche, then protect a password with PBKDF2", "algo": "sha256", "attack": "birthday_collision" }
+      ]
+    },
+    "viz": {
+      "slower": "Slower",
+      "faster": "Faster",
+      "show_snapshot": "Show details",
+      "hide_snapshot": "Hide details"
+    },
+    "winner": "Winner",
+    "search": "Search by algorithm name...",
+    "no_results": "No matches — try another word",
+    "show_output": "Show full output",
+    "hide_output": "Hide output",
+    "break_it": "Break it now",
+    "the_victim": "Victim",
+    "rerun": "Re-run",
+    "records": "records",
+    "refresh": "Refresh"
+  },
   "alg": {
     "overview": "Overview",
     "history": "Story & history",

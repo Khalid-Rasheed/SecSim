@@ -28,7 +28,16 @@
               <span
                 v-if="algo.family"
                 class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-panel2 border border-[rgba(148,163,184,0.25)] text-muted"
-                >{{ algo.family }}<span v-if="algo.kind"> · {{ algo.kind }}</span></span
+                >{{ $t('tax.' + algo.family)
+                }}<span v-if="algo.kind"> · {{ $t('tax.' + algo.kind) }}</span></span
+              >
+              <span
+                :class="[
+                  'font-mono text-[0.65rem] px-2 py-0.5 rounded border inline-flex items-center gap-1',
+                  levelBadgeClasses(levelFor(algo))
+                ]"
+                ><i :class="[levelIcon(levelFor(algo))]"></i
+                >{{ $t('ux.level_' + levelFor(algo)) }}</span
               >
               <span
                 v-if="algo.security"
@@ -113,12 +122,44 @@
         </div>
       </section>
 
-      <!-- SECURITY -->
-      <section class="rounded-[14px] border border-dangerx/30 bg-dangerx/5 p-6 mt-4">
-        <h2 class="font-semibold text-sm mb-3 text-dangerx">
+      <!-- SECURITY: color follows the security level (green = safe to
+           use, red = broken teaching-only) so beginners aren't misled. -->
+      <section
+        class="rounded-[14px] border p-6 mt-4"
+        :class="{
+          'border-cipher/30 bg-cipher/5': algo.security === 'secure',
+          'border-dangerx/30 bg-dangerx/5': algo.security === 'broken',
+          'border-keyamber/30 bg-keyamber/5': algo.security !== 'secure' && algo.security !== 'broken'
+        }"
+      >
+        <h2
+          class="font-semibold text-sm mb-3"
+          :class="{
+            'text-cipher': algo.security === 'secure',
+            'text-dangerx': algo.security === 'broken',
+            'text-keyamber': algo.security !== 'secure' && algo.security !== 'broken'
+          }"
+        >
           <i class="fa-solid fa-shield-halved me-2"></i>{{ $t('alg.security') }}
         </h2>
         <p class="text-sm text-mist/90 leading-loose">{{ t(details.security) }}</p>
+        <!-- Cross-links: broken cipher → its live attack; attack → its victim. -->
+        <div class="flex gap-2 flex-wrap mt-4">
+          <router-link
+            v-if="attackFor"
+            :to="{ path: '/simulator', query: { algo: attackFor } }"
+            class="btn-ghost px-4 py-2 text-xs !border-dangerx/40 !text-dangerx"
+          >
+            <i class="fa-solid fa-burst me-1.5"></i>{{ $t('ux.break_it') }}
+          </router-link>
+          <router-link
+            v-if="victimOf"
+            :to="'/algorithms/' + victimOf"
+            class="btn-ghost px-4 py-2 text-xs"
+          >
+            <i class="fa-solid fa-crosshairs me-1.5"></i>{{ $t('ux.the_victim') }}: {{ victimOf }}
+          </router-link>
+        </div>
       </section>
 
       <!-- USES -->
@@ -145,6 +186,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import api from '../services/api'
+import { levelFor, levelBadgeClasses, levelIcon, ATTACK_FOR, VICTIM_OF } from '../utils/ux'
 
 const { locale } = useI18n()
 const route = useRoute()
@@ -153,6 +195,10 @@ const error = ref(false)
 
 const details = computed(() => algo.value?.details || {})
 const t = (obj) => obj?.[locale.value] || obj?.en || ''
+/** Live attack id for this cipher (undefined for secure algorithms). */
+const attackFor = computed(() => (algo.value ? ATTACK_FOR[algo.value.id] : undefined))
+/** Victim algorithm id when this page IS an attack. */
+const victimOf = computed(() => (algo.value ? VICTIM_OF[algo.value.id] : undefined))
 const steps = computed(
   () => details.value.how_it_works?.[locale.value] || details.value.how_it_works?.en || []
 )

@@ -19,9 +19,13 @@
       <router-link to="/simulator" class="navlink text-sm">
         <i class="fa-solid fa-flask me-1.5 text-xs"></i>{{ $t('nav.simulator') }}
       </router-link>
+      <router-link to="/learn" class="navlink text-sm hidden sm:inline-block">
+        <i class="fa-solid fa-route me-1.5 text-xs"></i>{{ $t('ux.learn.eyebrow') }}
+      </router-link>
 
-      <!-- ALGORITHMS DROPDOWN: Encryption (symmetric/asymmetric tree) + hashing + attacks -->
-      <div class="relative hidden sm:inline-block" @keydown.escape="closeMenu">
+      <!-- ALGORITHMS DROPDOWN (visible on mobile too: beginners on
+           phones lost the whole menu when it was sm+ only). -->
+      <div class="relative inline-block" @keydown.escape="closeMenu">
         <button
           :aria-expanded="open"
           aria-haspopup="true"
@@ -48,15 +52,33 @@
             <i class="fa-solid fa-circle-notch fa-spin me-1.5"></i>{{ $t('sim.brief_loading') }}
           </p>
           <template v-else>
+            <!-- Instant search across ids + bilingual names (19 items). -->
+            <div class="px-2 pt-1 pb-2 sticky top-0 bg-white">
+              <div class="relative">
+                <i
+                  class="fa-solid fa-magnifying-glass absolute start-3 top-1/2 -translate-y-1/2 text-muted text-xs"
+                ></i>
+                <input
+                  v-model="query"
+                  class="field w-full ps-8 pe-3 py-2 text-xs"
+                  :placeholder="$t('ux.search')"
+                  dir="auto"
+                />
+              </div>
+            </div>
+            <p v-if="!anythingVisible" class="text-xs text-muted px-3 py-4 text-center">
+              {{ $t('ux.no_results') }}
+            </p>
             <!-- 3 TABS: symmetric / asymmetric / hashing (each grouped by kind) -->
-            <div v-for="fam in menuTabs" :key="fam.family" class="mb-1">
+            <div v-for="fam in menuTabs" v-show="famVisible(fam)" :key="fam.family" class="mb-1">
               <p class="px-3 pt-2 pb-1 text-[0.68rem] font-extrabold text-mist uppercase tracking-wide">
                 <i :class="[fam.icon, 'me-1.5', fam.color]"></i>{{ $t('tax.' + fam.family) }}
               </p>
-              <div v-for="g in fam.kinds" :key="g.kind" class="mb-1">
+              <div v-for="g in fam.kinds" v-show="groupVisible(g)" :key="g.kind" class="mb-1">
                 <p class="px-3 text-[0.65rem] text-muted font-semibold">{{ $t('tax.' + g.kind) }}</p>
                 <router-link
                   v-for="a in g.items"
+                  v-show="matches(a)"
                   :key="a.id"
                   :to="{ path: '/simulator', query: { algo: a.id } }"
                   class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-teal-700/5 transition"
@@ -80,12 +102,12 @@
             </div>
 
             <!-- ATTACK LAB -->
-            <div v-if="menuAttacks.length">
+            <div v-if="visibleAttacks.length">
               <p class="px-3 pt-2 pb-1 text-[0.68rem] font-extrabold text-mist uppercase tracking-wide">
                 <i class="fa-solid fa-burst me-1.5 text-keyamber"></i>{{ $t('tax.attack_lab') }}
               </p>
               <router-link
-                v-for="a in menuAttacks"
+                v-for="a in visibleAttacks"
                 :key="a.id"
                 :to="{ path: '/simulator', query: { algo: a.id } }"
                 class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-teal-700/5 transition"
@@ -171,6 +193,7 @@ async function toggleMenu() {
 
 function closeMenu() {
   open.value = false
+  query.value = ''
 }
 
 // Three tabs (symmetric / asymmetric / hashing), each grouped by kind,
@@ -215,6 +238,26 @@ const menuAttacks = computed(() => {
   if (sim.taxonomy?.attacks?.length) return sim.taxonomy.attacks
   return sim.algorithms.filter((a) => a.type === 'attack')
 })
+
+// Instant menu search (id + bilingual name). Helpers below hide
+// non-matching items / groups so the 19-entry menu stays scannable.
+const query = ref('')
+function matches(a) {
+  const q = query.value.trim().toLowerCase()
+  if (!q) return true
+  const name = String(a.name?.[locale.value] || a.name?.en || '').toLowerCase()
+  return a.id.toLowerCase().includes(q) || name.includes(q)
+}
+function groupVisible(g) {
+  return g.items.some(matches)
+}
+function famVisible(fam) {
+  return fam.kinds.some(groupVisible)
+}
+const visibleAttacks = computed(() => menuAttacks.value.filter(matches))
+const anythingVisible = computed(
+  () => menuTabs.value.some(famVisible) || visibleAttacks.value.length > 0
+)
 
 function toggleLang() {
   const next = locale.value === 'ar' ? 'en' : 'ar'
