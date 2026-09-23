@@ -60,6 +60,12 @@
                 >{{ $t('nav.login') }}
               </router-link>
             </li>
+            <li>
+              <router-link to="/help" class="text-muted hover:text-teal-700 font-semibold transition">
+                <i class="fa-solid fa-circle-question text-[0.65rem] me-2 text-teal-600"></i
+                >{{ $t('nav.help') }}
+              </router-link>
+            </li>
           </ul>
         </div>
 

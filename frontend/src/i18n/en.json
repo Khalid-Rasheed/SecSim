@@ -8,7 +8,8 @@
     "history": "History",
     "profile": "Profile",
     "login": "Login",
-    "logout": "Logout"
+    "logout": "Logout",
+    "help": "Help"
   },
   "tax": {
     "encryption": "Encryption",
@@ -300,6 +301,58 @@
     "rerun": "Re-run",
     "records": "records",
     "refresh": "Refresh"
+  },
+  "help": {
+    "title": "Help Center",
+    "subtitle": "Quick answers to common questions — search or browse",
+    "search": "Search questions...",
+    "no_results": "No results — try different words",
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "items": [
+        {
+          "q": "Why doesn't RSA decryption work with Arabic text?",
+          "a": "RSA in this platform uses tiny teaching primes (p=61, q=53). These are too small to represent Unicode Arabic characters. Fix: use larger primes (p, q > 1,000,000) or stick to English/digits in the demo."
+        },
+        {
+          "q": "What's the difference between encryption and hashing?",
+          "a": "Encryption is two-way: input text + key → ciphertext, recoverable with the key. Hashing is one-way: input → fixed fingerprint, impossible to reverse. Hashing proves data integrity; it hides nothing."
+        },
+        {
+          "q": "Why does AES give different results each time for the same text and key?",
+          "a": "CBC mode generates a random IV (initialization vector) each run. This is intentional — it prevents pattern repetition and makes encryption safer. The IV is prepended to the ciphertext for decryption."
+        },
+        {
+          "q": "What does 'avalanche' mean in the tests?",
+          "a": "Flipping one input bit flips ~50% of the output bits. This is the mark of a strong algorithm — attackers can't 'get close' to the answer incrementally."
+        },
+        {
+          "q": "Why does the dictionary attack fail on a password not in the 30-word list?",
+          "a": "The built-in list is tiny (30 common words) for teaching only. Real attacker dictionaries hold millions of words plus mangling rules. Real defense: unique salt + slow derivation (Argon2/PBKDF2) + a long passphrase outside every dictionary."
+        },
+        {
+          "q": "How does the man-in-the-middle attack on Diffie-Hellman work?",
+          "a": "Eve intercepts and substitutes the public values Alice and Bob exchange. Each party agrees on a secret with HER (two different secrets!) so she reads everything. The attack fails instantly with authenticated values (signatures/certs)."
+        },
+        {
+          "q": "What is 'salt' in PBKDF2 and do I need to enter it manually?",
+          "a": "Salt is a random value mixed into the password before derivation — it defeats rainbow tables. In this demo: leave the salt field empty to auto-generate a random one (that's the correct way)."
+        },
+        {
+          "q": "Why is Caesar 'broken' and what's the lesson?",
+          "a": "Its keyspace is only 25 — trying all takes a fraction of a second. The lesson: security = enormous keyspace. Even a simple cipher with 256-bit keys needs more energy than the observable universe to break."
+        },
+        {
+          "q": "Where can I find ready-to-try examples?",
+          "a": "The 'Fill example' button in the simulator populates sensible defaults for each algorithm (e.g., LEMON for Vigenère, 'password' for MD5). The 'Full guide' link on each algorithm card goes to its reference page."
+        },
+        {
+          "q": "How do I report a bug or suggest an improvement?",
+          "a": "The project is open source on GitHub: open an Issue or Pull Request. For security vulnerabilities, see SECURITY.md for private disclosure."
+        }
+      ]
+    },
+    "cta_text": "Ready to try? Start from the learning path or open the simulator directly."
   },
   "alg": {
     "overview": "Overview",

@@ -22,6 +22,9 @@
       <router-link to="/learn" class="navlink text-sm hidden sm:inline-block">
         <i class="fa-solid fa-route me-1.5 text-xs"></i>{{ $t('ux.learn.eyebrow') }}
       </router-link>
+      <router-link to="/help" class="navlink text-sm hidden sm:inline-block">
+        <i class="fa-solid fa-circle-question me-1.5 text-xs"></i>{{ $t('nav.help') }}
+      </router-link>
 
       <!-- ALGORITHMS DROPDOWN (visible on mobile too: beginners on
            phones lost the whole menu when it was sm+ only). -->
@@ -118,6 +121,16 @@
                 <span class="text-[0.7rem] text-muted truncate">{{ a.name?.[locale] || '' }}</span>
               </router-link>
             </div>
+
+            <!-- HELP -->
+            <router-link
+              :to="{ path: '/help' }"
+              class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-teal-700/5 transition"
+              @click="closeMenu"
+            >
+              <i class="fa-solid fa-circle-question text-teal-600 text-xs w-4 text-center"></i>
+              <span class="font-mono text-xs font-bold text-mist" dir="ltr">{{ $t('nav.help') }}</span>
+            </router-link>
           </template>
         </div>
       </div>

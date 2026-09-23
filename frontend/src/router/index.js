@@ -16,12 +16,14 @@ import Simulator from '../views/Simulator.vue'
 import History from '../views/History.vue'
 import Profile from '../views/Profile.vue'
 import Login from '../views/Login.vue'
+import Help from '../views/Help.vue'
 
 import AlgorithmDetails from '../views/AlgorithmDetails.vue'
 
 const routes = [
   { path: '/', component: Home },
   { path: '/learn', component: LearnPath },
+  { path: '/help', component: Help },
   { path: '/simulator', component: Simulator },
   { path: '/algorithms/:id', component: AlgorithmDetails },
   { path: '/history', component: History },
